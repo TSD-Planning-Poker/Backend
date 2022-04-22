@@ -1,6 +1,7 @@
 from tkinter import CASCADE
 from django.db import models
 from django.contrib.auth.models import AbstractUser, User
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # class User(AbstractUser):
 #     username = models.CharField(max_length=200, unique=True)
@@ -25,6 +26,8 @@ class Room(models.Model):
 class Deck(models.Model):
     name = models.CharField(max_length=200)
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -44,3 +47,8 @@ class Task(models.Model):
         return self.body[:50]
 
 
+class Mark(models.Model):
+    mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)

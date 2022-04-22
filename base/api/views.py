@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from base.models import Room
-from .serializers import RoomSerializer
+from base.models import Room, Task, Deck, Mark
+from .serializers import RoomSerializer, DeckSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, DeckDetailSerializer, TaskDetailSerializer, MarkDetailSerializer
 from base.api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -15,32 +15,29 @@ def getRoutes(request):
         '/api',
         '/api/rooms',
         '/api/rooms/:id',
-        '/api/room/:id/join'
+        '/api/rooms/:id/create_deck', # TODO
+        '/api/room/:id/join',
+        '/api/decks',
+        '/api/decks/:id',
+        '/api/decks/:id/cerate_task', # TODO
+        '/api/tasks',
+        '/api/tasks/:id',
+        '/api/marks',
+        '/api/marks/:id',
     ]
     return Response(routes)
 
 
-# @api_view(['GET', 'POST'])
-# def getRooms(request):
-#     rooms = Room.objects.all()
-#     serializer = RoomSerializer(rooms, many=True)
-#     return Response(serializer.data)
-
-
+# ROOM:
 @api_view(['GET', 'POST'])
 def getRoom(request, pk):
     room = Room.objects.get(id=pk)
-    serializer = RoomSerializer(room, many=False)
+    serializer = RoomDetailSerializer(room, many=False)
     return Response(serializer.data)
-
 
 class RoomListCreateAPIView(generics.ListCreateAPIView):
     queryset = Room.objects.all().order_by("id")
     serializer_class = RoomSerializer
-
-# class RoomDetailListCreateAPIView(generics.ListCreateAPIView):
-#     queryset = Room.objects.all().order_by("id")
-#     serializer_class = RoomSerializer
 
 class JoinRoomAPIView(APIView):
     serializer_class = RoomSerializer
@@ -57,3 +54,42 @@ class JoinRoomAPIView(APIView):
         serializer = self.serializer_class(room, context=serializer_context)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+# DECK:
+class DeckListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Deck.objects.all().order_by("id")
+    serializer_class = DeckSerializer
+
+@api_view(['GET', 'POST'])
+def getDeck(request, pk):
+    deck = Deck.objects.get(id=pk)
+    serializer = DeckDetailSerializer(deck, many=False)
+    return Response(serializer.data)
+
+
+
+# TASK:
+class TaskListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Task.objects.all().order_by("id")
+    serializer_class = TaskSerializer
+
+@api_view(['GET', 'POST'])
+def getTask(request, pk):
+    task = Task.objects.get(id=pk)
+    serializer = TaskDetailSerializer(task, many=False)
+    return Response(serializer.data)
+
+
+
+# MARK:
+class MarkListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Mark.objects.all().order_by("id")
+    serializer_class = MarkSerializer
+
+@api_view(['GET', 'POST'])
+def getMark(request, pk):
+    mark = Mark.objects.get(id=pk)
+    serializer = MarkDetailSerializer(mark, many=False)
+    return Response(serializer.data)
