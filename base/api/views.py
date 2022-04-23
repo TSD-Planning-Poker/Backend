@@ -12,8 +12,11 @@ from django.contrib.auth.models import AbstractUser, User
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def getRoutes(request):
+    """
+    Get all routes temp view
+    """
     routes = [
         '/api/rooms',
         '/api/rooms/:id',
@@ -35,15 +38,22 @@ def getRoutes(request):
 # ROOM:
 @api_view(['GET', 'POST'])
 def getRoom(request, pk):
+    """ Get Room details """
     room = Room.objects.get(id=pk)
     serializer = RoomDetailSerializer(room, many=False)
     return Response(serializer.data)
 
 class RoomListCreateAPIView(generics.ListCreateAPIView):
+    """ List all room """
     queryset = Room.objects.all().order_by("id")
     serializer_class = RoomSerializer
 
 class JoinRoomAPIView(APIView):
+    """ 
+    Join a specific room 
+    Method: GET
+    Accepts: pk(room_id), id(user_id)
+    """
     serializer_class = JoinRoomSerializer
 
     @transaction.atomic
@@ -61,30 +71,22 @@ class JoinRoomAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-
-# DECK:
-class DeckListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Deck.objects.all().order_by("id")
-    serializer_class = DeckSerializer
-
-@api_view(['GET', 'POST'])
-def getDeck(request, pk):
-    deck = Deck.objects.get(id=pk)
-    serializer = DeckDetailSerializer(deck, many=False)
-    return Response(serializer.data)
-
-
-
 # TASK:
-class TaskListCreateAPIView(generics.ListCreateAPIView):
+class TaskListAPIView(generics.ListCreateAPIView):
+    """
+    List all tasks
+    Method: GET
+    """
     queryset = Task.objects.all().order_by("id")
     serializer_class = TaskSerializer
 
-class GetTaskDetail(generics.ListCreateAPIView):
-    serializer_class = TaskSerializer
-
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
 def getTask(request, pk):
+    """ 
+    Get task details with marks and average mark
+    Method: Get
+    Accepts: (int) Task_id
+    """
     task = Task.objects.get(id=pk)
     marks = []
     if task:
@@ -102,7 +104,12 @@ def getTask(request, pk):
     return JsonResponse(data= {"task": dict_obj, "avarage": total, "marks": marks}, safe=False)
 
 
-class TaskApiView(generics.GenericAPIView):
+class TaskAddApiView(generics.GenericAPIView):
+    """
+    Add a new task 
+    Method: POST
+    Accepts: { "room_id": int, "body": string }
+    """
     serializer_class = TaskSerialiser2
 
     def post(self, request):
@@ -121,9 +128,13 @@ class TaskApiView(generics.GenericAPIView):
         return JsonResponse(data= dict_obj, safe=False)
 
 
-
 @api_view(['GET'])
 def get_tasks_from_room(request, id):
+    """
+    List tasks in a room
+    Method: Get
+    Accepts: room_id
+    """
     room = Room.objects.filter(id=id).first()
     if room:
         tasks = list(Task.objects.filter(room=room).values())
@@ -134,35 +145,25 @@ def get_tasks_from_room(request, id):
 
 @api_view(['GET'])
 def get_marks_from_tasks(request, id):
+    """
+    List  marks assigned for a task
+    Metod: Get
+    Accepts: task_id
+    """
     task = Task.objects.filter(id=id).first()
     if task:
         marks = list(Mark.objects.filter(task=task).values())
     else:
         marks = []
-    
-
-    
     return JsonResponse(data=marks, safe=False)
-
-class AddTask(APIView):
-    serializer_class = JoinRoomSerializer
-
-    @transaction.atomic
-    def get(self, request: request.Request, pk, id):
-
-        room = get_object_or_404(Room, pk=pk)
-        user = get_object_or_404(User, pk=id)
-
-        room.members.add(user)
-        room.save()
-
-        serializer_context = {"request": request}
-        serializer = self.serializer_class(room, context=serializer_context)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class AddMarks(APIView):
+    """
+    Assign a new Mark to a task
+    Method: POST
+    Accepts: { "task_id": int , "mark": int}
+    """
     serializer_class = AddMarksSerializer
 
     @transaction.atomic
@@ -182,12 +183,21 @@ class AddMarks(APIView):
 
         return JsonResponse(data= dict_obj, safe=False)
 # MARK:
-class MarkListCreateAPIView(generics.ListCreateAPIView):
+class MarkListAPIView(generics.ListCreateAPIView):
+    """
+    List all marks 
+    Method: Get
+    """
     queryset = Mark.objects.all().order_by("id")
     serializer_class = MarkSerializer
 
 @api_view(['GET', 'POST'])
 def getMark(request, pk):
+    """
+    Get mark details 
+    Method: GET
+    Accepts: mark_id
+    """
     mark = Mark.objects.get(id=pk)
     serializer = MarkDetailSerializer(mark, many=False)
     return Response(serializer.data)
