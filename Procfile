@@ -1,1 +1,1 @@
-web: gunicorn PlanningPokerTool.wsgi
+worker: gunicorn PlanningPokerTool.wsgi
