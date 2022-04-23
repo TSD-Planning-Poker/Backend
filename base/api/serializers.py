@@ -19,7 +19,6 @@ class StringLookupField(StringRelatedField):
         obj = self.model.objects.filter(**{self.field: data}).first()
         return obj.id
 
-
 # ROOM:
 class RoomSerializer(ModelSerializer):
     class Meta:
@@ -29,7 +28,6 @@ class RoomSerializer(ModelSerializer):
 class JoinRoomSerializer(Serializer):
     room = Room
     user = User
-
 
 class AddMarksSerializer(Serializer):
     mark = serializers.FloatField()
@@ -61,31 +59,6 @@ class RoomDetailSerializer(ModelSerializer):
         except Exception as e:
             print(e)
             return False
-        
-
-        
-
-
-
-# DECK:
-class DeckSerializer(ModelSerializer):
-    class Meta:
-        model = Deck
-        exclude = ["updated", "created"]
-
-class DeckDetailSerializer(ModelSerializer):
-    class Meta:
-        model = Deck
-        fields = "__all__"
-
-    tasks = SerializerMethodField(read_only=True)
-
-    def get_tasks(self, instance):
-        tasks = Task.objects.filter(deck=instance.pk).values("id", "user_id", "body")
-        print(tasks)
-        return tasks
-        
-
 
 # TASK:
 class TaskSerializer(ModelSerializer):
@@ -97,8 +70,6 @@ class TaskDetailSerializer(ModelSerializer):
     class Meta:
         model = Task
         fields = "__all__"
-
-
 
 # MARK:
 class MarkSerializer(ModelSerializer):
