@@ -1,12 +1,12 @@
 from dataclasses import field
-from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField
+from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField, Serializer
 from base.models import Room, Deck, Task, User, Mark
 from django.db import models
 from django.http import JsonResponse
-from django.core import serializers
+from rest_framework import serializers
 from django.http import HttpResponse
 from rest_framework.response import Response
-from rest_framework.decorators import action
+# from rest_framework.decorators import action
 
 
 class StringLookupField(StringRelatedField):
@@ -26,6 +26,19 @@ class RoomSerializer(ModelSerializer):
         model = Room
         exclude = ["updated", "created"]
 
+class JoinRoomSerializer(Serializer):
+    room = Room
+    user = User
+
+
+class AddMarksSerializer(Serializer):
+    mark = serializers.FloatField()
+    task_id = serializers.IntegerField()
+
+class TaskSerialiser2(Serializer):
+    room_id = serializers.CharField()
+    body = serializers.CharField()
+
 class RoomDetailSerializer(ModelSerializer):
     class Meta:
         model = Room
@@ -35,8 +48,22 @@ class RoomDetailSerializer(ModelSerializer):
     deck = SerializerMethodField(read_only=True)
 
     def get_deck(self, instance):
-        deck = Deck.objects.get(room=instance.pk)
-        return deck.id
+        deck = Deck.objects.filter(room=instance.pk).values('id')
+        if deck.count() > 0:
+            return deck
+        else:
+            return []
+
+    def join_room(self, instance, user):
+        try: 
+            instance.members.add(user)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        
+
+        
 
 
 
