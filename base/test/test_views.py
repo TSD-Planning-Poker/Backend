@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.shortcuts import reverse
 from django.contrib.auth.models import AbstractUser, User
 
-from base.models import Room
+from base.models import Mark, Room, Task
 
 
 
@@ -18,7 +18,7 @@ class ApiTestCases(TestCase):
 
         return super().setUp()
 
-    def est_add_rooms_and_details(self):
+    def test_add_rooms_and_details(self):
         payload = {
             "name": "test room 2",
             "description": "somethign",
@@ -35,7 +35,7 @@ class ApiTestCases(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.data), 0)
 
-    def test_tasks(self):
+    def test_tasks_crud(self):
         # Create a room for testing tasks
         room = Room.objects.create(
             host=self.user,
@@ -55,6 +55,35 @@ class ApiTestCases(TestCase):
 
         # Testing get task list 
         response = self.client.get(reverse('task-list'))
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response.data), 0)
+    
+    def test_marks_crud(self):
+        # Create a room for testing tasks
+        room = Room.objects.create(
+            host=self.user,
+            name = "test room",
+            description = "tt"
+        )
+
+        # Create a taks for testing marks
+        task = Task.objects.create(
+            body = "something",
+            room = room
+        )
+
+        # Mark to be created
+        payload = {
+            "mark": 2,
+            "task": task.pk
+        }
+        response = self.client.post(reverse('mark-list'), data=payload)
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data["mark"], payload["mark"])
+        self.assertEqual(response.data["task"], task.pk )
+
+        # Testing get task list 
+        response = self.client.get(reverse('mark-list'))
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.data), 0)
 
