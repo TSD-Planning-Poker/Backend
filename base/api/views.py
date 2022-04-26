@@ -144,6 +144,22 @@ def get_tasks_from_room(request, id):
     return JsonResponse(data=tasks, safe=False)
 
 @api_view(['GET'])
+def get_users_from_room(request, id):
+    """
+    List users in a room
+    Method: Get
+    Accepts: room_id
+    """
+    room = Room.objects.filter(id=id).first()
+    if room:
+        members = list(room.members.all().values())
+
+    else:
+        members = []
+    
+    return JsonResponse(data=members, safe=False)
+
+@api_view(['GET'])
 def get_marks_from_tasks(request, id):
     """
     List  marks assigned for a task
