@@ -12,3 +12,4 @@ sqlparse==0.4.2
 tk==0.1.0
 whitenoise==6.0.0
 gunicorn
+django_cors_headers=3.11.0
