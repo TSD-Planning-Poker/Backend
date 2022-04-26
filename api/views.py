@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from base.models import Room, Task, Deck, Mark
 from .serializers import AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer
-from base.api import serializers
+from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404, ListCreateAPIView

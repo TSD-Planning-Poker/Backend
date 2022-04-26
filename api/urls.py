@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from base.api.views import AddMarks, RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, TaskAddApiView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
+from .views import AddMarks, RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, TaskAddApiView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
 
 
 urlpatterns = [
