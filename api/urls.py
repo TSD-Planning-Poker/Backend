@@ -4,8 +4,6 @@ from .views import RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, Task
 
 
 urlpatterns = [
-    path('', views.getRoutes),
-
     path('rooms/', RoomListCreateAPIView.as_view(), name="room-list"),
     path('rooms/<int:id>/alltasks/', get_tasks_from_room, name="room-alltasks"),
     path('rooms/<int:id>/allusers/', get_users_from_room, name="room-alltasks"),

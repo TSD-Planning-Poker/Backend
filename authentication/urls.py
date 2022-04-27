@@ -18,7 +18,9 @@ from django.urls import include, path
 from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken import views
+from .views import logout_view
 
 urlpatterns = [
-    path('login/', views.obtain_auth_token)
+    path('login/', views.obtain_auth_token, name="log_in"),
+    path('logout/', logout_view, name="log_out")
 ]

@@ -15,29 +15,6 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
 
-@api_view(['GET'])
-def getRoutes(request):
-    """
-    Get all routes temp view
-    """
-    routes = [
-        '/api/rooms',
-        '/api/rooms/:id',
-        '/api/rooms/<int:pk>/join/<int:id>',
-        '/api/room/:id/alltasks',
-
-        '/api/tasks',
-        '/api/tasks/:id',
-        '/api/tasks/:id/allmarks',
-        '/api/tasks/add',
-
-        '/api/marks',
-        '/api/marks/add',
-        '/api/marks/:id',
-    ]
-    return Response(routes)
-
-
 # ROOM:
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
