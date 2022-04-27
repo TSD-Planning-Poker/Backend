@@ -11,6 +11,9 @@ from django.db import transaction
 from django.contrib.auth.models import AbstractUser, User
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import authentication_classes, permission_classes
 
 @api_view(['GET'])
 def getRoutes(request):
@@ -36,7 +39,9 @@ def getRoutes(request):
 
 
 # ROOM:
-@api_view(['GET', 'POST'])
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def getRoom(request, pk):
     """ Get Room details """
     room = Room.objects.get(id=pk)
@@ -45,6 +50,10 @@ def getRoom(request, pk):
 
 class RoomListCreateAPIView(generics.ListCreateAPIView):
     """ List all room """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = Room.objects.all().order_by("id")
     serializer_class = RoomSerializer
 
@@ -55,6 +64,8 @@ class JoinRoomAPIView(APIView):
     Accepts: pk(room_id), id(user_id)
     """
     serializer_class = JoinRoomSerializer
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @transaction.atomic
     def get(self, request: request.Request, pk, id):
@@ -77,10 +88,14 @@ class TaskListAPIView(generics.ListCreateAPIView):
     List all tasks
     Method: GET
     """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Task.objects.all().order_by("id")
     serializer_class = TaskSerializer
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def getTask(request, pk):
     """ 
     Get task details with marks and average mark
@@ -104,31 +119,9 @@ def getTask(request, pk):
     return JsonResponse(data= {"task": dict_obj, "avarage": total, "marks": marks}, safe=False)
 
 
-class TaskAddApiView(generics.GenericAPIView):
-    """
-    Add a new task 
-    Method: POST
-    Accepts: { "room_id": int, "body": string }
-    """
-    serializer_class = TaskSerialiser2
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        room = Room.objects.filter(pk=serializer.data['room_id'])
-
-        task = Task.objects.create(
-            body = serializer.data['body'],
-            room = room.first()
-        )
-        dict_obj = model_to_dict( task )
-
-        # return Response(json.dumps(task.values()), status=status.HTTP_200_OK)
-        return JsonResponse(data= dict_obj, safe=False)
-
-
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_tasks_from_room(request, id):
     """
     List tasks in a room
@@ -144,6 +137,8 @@ def get_tasks_from_room(request, id):
     return JsonResponse(data=tasks, safe=False)
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_users_from_room(request, id):
     """
     List users in a room
@@ -159,7 +154,10 @@ def get_users_from_room(request, id):
     
     return JsonResponse(data=members, safe=False)
 
+
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_marks_from_tasks(request, id):
     """
     List  marks assigned for a task
@@ -174,40 +172,21 @@ def get_marks_from_tasks(request, id):
     return JsonResponse(data=marks, safe=False)
 
 
-class AddMarks(APIView):
-    """
-    Assign a new Mark to a task
-    Method: POST
-    Accepts: { "task_id": int , "mark": int}
-    """
-    serializer_class = AddMarksSerializer
-
-    @transaction.atomic
-    def get(self, request: request.Request):
-
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        task = get_object_or_404(Task, pk=serializer.data['task_id'])
-
-        mark = Mark.objects.create(
-            mark = serializer.data['mark'],  
-            task = task
-        )
-
-        dict_obj = model_to_dict( mark )
-
-        return JsonResponse(data= dict_obj, safe=False)
 # MARK:
 class MarkListAPIView(generics.ListCreateAPIView):
     """
     List all marks 
     Method: Get
     """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Mark.objects.all().order_by("id")
     serializer_class = MarkSerializer
 
-@api_view(['GET', 'POST'])
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def getMark(request, pk):
     """
     Get mark details 

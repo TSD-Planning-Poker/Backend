@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'base',
     'rest_framework',
-
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -75,6 +75,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'PlanningPokerTool.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ]
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
