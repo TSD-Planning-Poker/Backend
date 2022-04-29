@@ -14,49 +14,49 @@ class BaseModelManager(models.Manager):
         tasks = Task.objects.filter(room = self)
         return tasks
 
+class BaseModel(models.Model):
 
-class Room(models.Model):
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Room(BaseModel):
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     members = models.ManyToManyField(User, related_name='members', blank=True)
-    updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
-
+    
     objects = BaseModelManager()
-    class Meta:
-        ordering = ['-created']
 
     def __str__(self):
         return self.name
 
 
-class Deck(models.Model):
+class Deck(BaseModel):
     name = models.CharField(max_length=200)
-    room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True)
-    updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
+    # room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True)
+    # creator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
 
     def __str__(self):
         return self.name
         
 
-class Task(models.Model):
+class Task(BaseModel):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=False)
     body = models.TextField()
-    updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created']
+    creator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
     
-
     def __str__(self):
         return self.body[:50]
 
 
-class Mark(models.Model):
+class Mark(BaseModel):
     mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
-    updated = models.DateTimeField(auto_now=True)
-    created = models.DateTimeField(auto_now_add=True)
+    evaluator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
+
+    def __str__(self):
+        return self.mark

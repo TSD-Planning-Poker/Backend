@@ -1,4 +1,5 @@
 import json
+from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from base.models import Room, Task, Deck, Mark
@@ -15,24 +16,62 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
 
-# ROOM:
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def getRoom(request, pk):
-    """ Get Room details """
-    room = Room.objects.get(id=pk)
-    serializer = RoomDetailSerializer(room, many=False)
-    return Response(serializer.data)
-
-class RoomListCreateAPIView(generics.ListCreateAPIView):
+class RoomsUpdateAndDetailsView(APIView):
     """ List all room """
 
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = Room.objects.all().order_by("id")
     serializer_class = RoomSerializer
+
+    def get(self, request, pk):
+        room = Room.objects.get(id=pk)
+        serializer = RoomDetailSerializer(room, many=False)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        room = Room.objects.filter(id=pk)
+
+        if room.count() > 0:
+            room = room.first()
+            room.name = serializer.data['name']
+            room.description = serializer.data['description']
+            room.save()
+            room_dict = model_to_dict( room )
+            return JsonResponse(data=room_dict, safe=False)
+        else:
+            return Response("Resource not found", status=status.HTTP_200_OK)
+
+
+
+class RoomListCreateAPIView(APIView):
+    """ List all room """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = RoomSerializer
+
+    def get(self, request):
+        rooms = list(Room.objects.all().order_by("id").values())
+        return JsonResponse(data=rooms, safe=False)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        # rooms = Room.objects.all().order_by("id")
+        serializer.is_valid(raise_exception=True)
+        room = Room.objects.create(
+            name=serializer.data['name'],
+            description=serializer.data['description'],
+            host=request.user, 
+        )
+        # room.save()
+        room_dict = model_to_dict( room )
+
+        return JsonResponse(data=room_dict, safe=False)
+
 
 class JoinRoomAPIView(APIView):
     """ 

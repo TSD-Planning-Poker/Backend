@@ -23,7 +23,7 @@ class StringLookupField(StringRelatedField):
 class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
-        exclude = ["updated", "created"]
+        exclude = ["updated_at", "created_at", "members"]
 
 class JoinRoomSerializer(Serializer):
     room = Room
@@ -43,14 +43,7 @@ class RoomDetailSerializer(ModelSerializer):
         fields = "__all__"
 
     members = StringLookupField(User, "username", many=True)
-    deck = SerializerMethodField(read_only=True)
-
-    def get_deck(self, instance):
-        deck = Deck.objects.filter(room=instance.pk).values('id')
-        if deck.count() > 0:
-            return deck
-        else:
-            return []
+    # deck = SerializerMethodField(read_only=True)
 
     def join_room(self, instance, user):
         try: 
@@ -64,7 +57,7 @@ class RoomDetailSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     class Meta:
         model = Task
-        exclude = ["updated", "created"]
+        exclude = ["updated_at", "created_at"]
 
 class TaskDetailSerializer(ModelSerializer):
     class Meta:
@@ -75,7 +68,7 @@ class TaskDetailSerializer(ModelSerializer):
 class MarkSerializer(ModelSerializer):
     class Meta:
         model = Mark
-        exclude = ["updated", "created"]
+        exclude = ["updated_at", "created_at"]
 
 class MarkDetailSerializer(ModelSerializer):
     class Meta:
