@@ -8,7 +8,8 @@ from rest_framework.authtoken.models import Token
 
 from rest_framework.response import Response
 
-
+from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
+from rest_framework.decorators import api_view, renderer_classes
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
