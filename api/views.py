@@ -2,8 +2,8 @@ import json
 from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from base.models import Room, Task, Deck, Mark
-from .serializers import AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer
+from base.models import Room, Task, Deck, Mark, UserStories
+from .serializers import AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer, UserSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -30,6 +30,34 @@ class RoomsUpdateAndDetailsView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        room = Room.objects.filter(id=pk)
+
+        if room.count() > 0:
+            room = room.first()
+            room.name = serializer.data['name']
+            room.description = serializer.data['description']
+            room.save()
+            room_dict = model_to_dict( room )
+            return JsonResponse(data=room_dict, safe=False)
+        else:
+            return Response("Resource not found", status=status.HTTP_200_OK)
+
+class UserStoriesApiView(APIView):
+    """ List all room """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = UserSerializer
+
+    def get(self, request, task_id):
+        
+        room = list(UserStories.objects.filter(related_task=task_id))
+        return Response(room)
+
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         room = Room.objects.filter(id=pk)

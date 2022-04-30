@@ -16,4 +16,8 @@ urlpatterns = [
 
     path('marks/', MarkListAPIView.as_view(), name="mark-list"),
     path('marks/<int:pk>/', views.getMark, name="mark-detail"),
+
+    path('stories', views.getMark, name="stories"),
+    path('stories/<int:pk>/', views.getMark, name="stories-id"),
+    
 ]
