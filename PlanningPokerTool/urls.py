@@ -14,14 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 # from xml.etree.ElementInclude import include
-from django.urls import include, path
+from django.urls import include, path, re_path
 from django.contrib import admin
 from django.urls import path
+from rest_framework_swagger.views import get_swagger_view
+
+from rest_framework.schemas import get_schema_view
+from rest_framework_swagger.renderers import SwaggerUIRenderer, OpenAPIRenderer
+import PlanningPokerTool.settings as settings
+
+
+schema_view = get_swagger_view(title='Planning Poker API')
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('base.urls')),
     path('base/', include('base.urls')),
     path('api/', include('api.urls')),
     path('auth/', include('authentication.urls')),
 ]
+
+# Add Swagger if django is in dev mode
+if settings.DEBUG:
+    urlpatterns.append(re_path(r'^docs', schema_view, name="docs"),)
