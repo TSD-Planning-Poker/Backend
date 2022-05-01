@@ -36,4 +36,4 @@ urlpatterns = [
 
 # Add Swagger if django is in dev mode
 if settings.DEBUG:
-    urlpatterns.append(re_path(r'^docs', schema_view, name="docs"),)
+    urlpatterns.append(re_path(r'^docs', schema_view, name="docs/"),)
