@@ -59,4 +59,4 @@ class Mark(BaseModel):
     evaluator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
 
     def __str__(self):
-        return self.mark
+        return str(self.mark)

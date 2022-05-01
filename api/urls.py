@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import RoomsUpdateAndDetailsView, RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
+from .views import RoomsUpdateAndDetailsView, RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, TaskListAPIView, TaskListAPIView, MarkUpdateAndDetailsAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
 
 
 urlpatterns = [
@@ -15,5 +15,5 @@ urlpatterns = [
     path('tasks/<int:pk>/', views.getTask, name="task-detail"),
 
     path('marks/', MarkListAPIView.as_view(), name="mark-list"),
-    path('marks/<int:pk>/', views.getMark, name="mark-detail"),
+    path('marks/<int:pk>/', MarkUpdateAndDetailsAPIView.as_view(), name="mark-detail"),
 ]

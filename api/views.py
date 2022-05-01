@@ -191,7 +191,7 @@ def get_marks_from_tasks(request, id):
 # MARK:
 class MarkListAPIView(generics.ListCreateAPIView):
     """
-    List all marks 
+    List all marks
     Method: Get
     """
     authentication_classes = [TokenAuthentication]
@@ -200,15 +200,33 @@ class MarkListAPIView(generics.ListCreateAPIView):
     serializer_class = MarkSerializer
 
 
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def getMark(request, pk): # change to class
-    """
-    Get mark details 
-    Method: GET
-    Accepts: mark_id
-    """
-    mark = Mark.objects.get(id=pk)
-    serializer = MarkDetailSerializer(mark, many=False)
-    return Response(serializer.data)
+class MarkUpdateAndDetailsAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        """
+        Mark details
+        Method: Get
+        """
+        mark = Mark.objects.get(id=pk)
+        serializer = MarkDetailSerializer(mark, many=False)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        """
+        Modify mark
+        Method: Put
+        """
+        serializer = MarkSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        mark = Mark.objects.filter(id=pk)
+
+        if mark.count() > 0:
+            mark = mark.first()
+            mark.mark = serializer.data['mark']
+            mark.save()
+            mark_dict = model_to_dict(mark)
+            return JsonResponse(data=mark_dict, safe=False)
+        else:
+            return Response("Resource not found", status=status.HTTP_200_OK)
