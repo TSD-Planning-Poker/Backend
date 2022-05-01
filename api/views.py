@@ -13,7 +13,7 @@ from django.contrib.auth.models import AbstractUser, User
 from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.decorators import authentication_classes, permission_classes
 
 class RoomsUpdateAndDetailsView(APIView):
@@ -203,7 +203,7 @@ class MarkListAPIView(generics.ListCreateAPIView):
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def getMark(request, pk):
+def getMark(request, pk): # change to class
     """
     Get mark details 
     Method: GET
