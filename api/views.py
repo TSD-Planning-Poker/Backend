@@ -188,41 +188,6 @@ class RoomListCreateAPIView(APIView):
         return JsonResponse(data=room_dict, safe=False)
 
 
-class JoinRoomAPIView(APIView):
-    """ 
-    Join a specific room 
-    Method: GET
-    Accepts: pk(room_id), id(user_id)
-    """
-    serializer_class = JoinRoomSerializer
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    @transaction.atomic
-    def get(self, request: request.Request, pk):
-        """
-        It adds a user to a room
-
-        :param request: request.Request - the request object
-        :type request: request.Request
-        :param pk: The primary key of the room
-        :param id: The id of the user to add to the room
-        :return: The room object with the new member added.
-        """
-
-        room = get_object_or_404(Room, pk=pk)
-        user = request.user
-
-        room.members.add(user)
-        room.save()
-
-        return Response(
-            {
-                "success": True, 
-                "room_joined": room.id, 
-                "message": "you have successfully joined the room"
-            }, status=status.HTTP_200_OK)
-
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
