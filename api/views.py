@@ -3,7 +3,7 @@ from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from base.models import Room, Task, Deck, Mark, UserStories
-from .serializers import AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer, UserSerializer
+from .serializers import UserStoriesDetailsSerializer, AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -50,28 +50,86 @@ class UserStoriesApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    serializer_class = UserSerializer
+    serializer_class = UserStoriesSerializer
 
-    def get(self, request, task_id):
+    def get(self, request):
+        """
+        It returns a list of all the values in the UserStories table
         
-        room = list(UserStories.objects.filter(related_task=task_id))
+        :param request: The request object is a standard Django request object
+        :return: The list of all the values in the UserStories table.
+        """
+        room = list(UserStories.objects.all().values())
         return Response(room)
 
     def post(self, request):
+        """
+        It creates a new UserStory object and returns a JsonResponse with the data of the newly created
+        object
+        
+        :param request: The request object
+        :return: The serializer.data is being returned.
+        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        room = Room.objects.filter(id=pk)
 
+        story = UserStories.objects.create(
+            title = serializer.data['title'],
+            description = serializer.data['description'],
+            related_task = Task.objects.get(id=serializer.data['related_task']),
+            created_by = request.user
+        )
+
+        sotry_obj = model_to_dict(story)
+        return JsonResponse(data=sotry_obj, safe=False)
+
+class UserStoriesUpdateAndDetailsApiView(APIView):
+    """ List all room """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = UserStoriesDetailsSerializer
+
+    def get(self, request, story_id):
+        """
+        It takes a request and a story_id, and returns a response with the story if it exists, or a
+        response with an error message if it doesn't
+        
+        :param request: The request object that was sent to the view
+        :param story_id: The id of the story you want to get
+        :return: The user story is being returned.
+        """
+        room = UserStories.objects.filter(id=story_id)
         if room.count() > 0:
-            room = room.first()
-            room.name = serializer.data['name']
-            room.description = serializer.data['description']
-            room.save()
-            room_dict = model_to_dict( room )
-            return JsonResponse(data=room_dict, safe=False)
+            room = room.values().first()
+            return Response(room)
         else:
-            return Response("Resource not found", status=status.HTTP_200_OK)
+            return Response("User story not found", status=400)
 
+    def put(self, request, story_id):
+        """
+        It takes a request and a story_id, validates the request, gets the story, updates the story, and
+        returns the updated story
+        
+        :param request: The request object is the first parameter to the view. It contains the request
+        data, including the request body, query parameters, and headers
+        :param story_id: The id of the story you want to update
+        :return: The response is a JSON object with the updated story.
+        """
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        story = UserStories.objects.get(id=story_id)
+        
+        if story:
+            story.title = serializer.data['title']
+            story.description = serializer.data['description']
+            story.save()
+            sotry_obj = model_to_dict(story)
+            return JsonResponse(data=sotry_obj, safe=False)
+        else:
+            return Response("User story not found", status=400)
 
 
 class RoomListCreateAPIView(APIView):
@@ -214,6 +272,25 @@ def get_marks_from_tasks(request, id):
     else:
         marks = []
     return JsonResponse(data=marks, safe=False)
+
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_stories_in_task(request, id):
+    """
+    It takes a task id, finds the task, and returns a list of all the stories associated with that task
+    
+    :param request: The request object
+    :param id: the id of the task
+    :return: A list of dictionaries.
+    """
+    task = Task.objects.filter(id=id).first()
+    if task:
+        stories = list(task.userstories_set.all().values())
+    else:
+        stories = []
+    return JsonResponse(data=stories, safe=False)
 
 
 # MARK:

@@ -40,17 +40,15 @@ class Deck(BaseModel):
 
     def __str__(self):
         return self.name
-        
 
 class Task(BaseModel):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=False)
     body = models.TextField()
-    creator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
+    # stories = models.one(to=UserStories, on_delete=models.DO_NOTHING, null=True)
+    created_by = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
     
     def __str__(self):
         return self.body[:50]
-
-
 class UserStories(BaseModel):
     title = models.CharField(max_length=200, null=False,)
     description = models.CharField(max_length=200, null=False,)
@@ -59,7 +57,6 @@ class UserStories(BaseModel):
 
     def __str__(self):
         return self.title
-
 class Mark(BaseModel):
     mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     task = models.ForeignKey(Task, on_delete=models.CASCADE)

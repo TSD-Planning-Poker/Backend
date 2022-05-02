@@ -26,10 +26,15 @@ class RoomSerializer(ModelSerializer):
         exclude = ["updated_at", "created_at", "members"]
 
 
-class UserSerializer(ModelSerializer):
+class UserStoriesSerializer(ModelSerializer):
     class Meta:
         model = UserStories
-        exclude = ["updated_at", "created_at"]
+        exclude = ["updated_at", "created_at", "created_by"]
+
+class UserStoriesDetailsSerializer(ModelSerializer):
+    class Meta:
+        model = UserStories
+        exclude = ["updated_at", "created_at", "created_by", "related_task"]
 
 class JoinRoomSerializer(Serializer):
     room = Room
