@@ -16,6 +16,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
 
+
 class RoomsUpdateAndDetailsView(APIView):
     """ List all room """
 
@@ -27,7 +28,7 @@ class RoomsUpdateAndDetailsView(APIView):
     def get(self, request, pk):
         """
         It gets a room with the given id, serializes it, and returns it
-        
+
         :param request: The request object is used to get the request data
         :param pk: The primary key of the room we want to retrieve
         :return: The room object is being returned.
@@ -39,7 +40,7 @@ class RoomsUpdateAndDetailsView(APIView):
     def put(self, request, pk):
         """
         If the room exists, update the room's name and description, and return the room's dictionary
-        
+
         :param request: The request object
         :param pk: The primary key of the room to be updated
         :return: A JsonResponse object is being returned.
@@ -53,10 +54,11 @@ class RoomsUpdateAndDetailsView(APIView):
             room.name = serializer.data['name']
             room.description = serializer.data['description']
             room.save()
-            room_dict = model_to_dict( room )
+            room_dict = model_to_dict(room)
             return JsonResponse(data=room_dict, safe=False)
         else:
             return Response("Resource not found", status=status.HTTP_200_OK)
+
 
 class UserStoriesApiView(APIView):
     """ List all room """
@@ -69,7 +71,7 @@ class UserStoriesApiView(APIView):
     def get(self, request):
         """
         It returns a list of all the values in the UserStories table
-        
+
         :param request: The request object is a standard Django request object
         :return: The list of all the values in the UserStories table.
         """
@@ -80,7 +82,7 @@ class UserStoriesApiView(APIView):
         """
         It creates a new UserStory object and returns a JsonResponse with the data of the newly created
         object
-        
+
         :param request: The request object
         :return: The serializer.data is being returned.
         """
@@ -88,14 +90,15 @@ class UserStoriesApiView(APIView):
         serializer.is_valid(raise_exception=True)
 
         story = UserStories.objects.create(
-            title = serializer.data['title'],
-            description = serializer.data['description'],
-            related_task = Task.objects.get(id=serializer.data['related_task']),
-            created_by = request.user
+            title=serializer.data['title'],
+            description=serializer.data['description'],
+            related_task=Task.objects.get(id=serializer.data['related_task']),
+            created_by=request.user
         )
 
         sotry_obj = model_to_dict(story)
         return JsonResponse(data=sotry_obj, safe=False)
+
 
 class UserStoriesUpdateAndDetailsApiView(APIView):
     """ List all room """
@@ -109,7 +112,7 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
         """
         It takes a request and a story_id, and returns a response with the story if it exists, or a
         response with an error message if it doesn't
-        
+
         :param request: The request object that was sent to the view
         :param story_id: The id of the story you want to get
         :return: The user story is being returned.
@@ -125,7 +128,7 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
         """
         It takes a request and a story_id, validates the request, gets the story, updates the story, and
         returns the updated story
-        
+
         :param request: The request object is the first parameter to the view. It contains the request
         data, including the request body, query parameters, and headers
         :param story_id: The id of the story you want to update
@@ -135,7 +138,7 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
         serializer.is_valid(raise_exception=True)
 
         story = UserStories.objects.get(id=story_id)
-        
+
         if story:
             story.title = serializer.data['title']
             story.description = serializer.data['description']
@@ -157,7 +160,7 @@ class RoomListCreateAPIView(APIView):
     def get(self, request):
         """
         It returns a list of all the rooms in the database, ordered by their id, in JSON format
-        
+
         :param request: The request object
         :return: A list of all the rooms in the database.
         """
@@ -167,7 +170,7 @@ class RoomListCreateAPIView(APIView):
     def post(self, request):
         """
         We create a new room object, and then we return a dictionary representation of that room object
-        
+
         :param request: The request object
         :return: A JsonResponse object.
         """
@@ -177,10 +180,10 @@ class RoomListCreateAPIView(APIView):
         room = Room.objects.create(
             name=serializer.data['name'],
             description=serializer.data['description'],
-            host=request.user, 
+            host=request.user,
         )
         # room.save()
-        room_dict = model_to_dict( room )
+        room_dict = model_to_dict(room)
 
         return JsonResponse(data=room_dict, safe=False)
 
@@ -196,10 +199,10 @@ class JoinRoomAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @transaction.atomic
-    def get(self, request: request.Request, pk, id):
+    def get(self, request: request.Request, pk):
         """
         It adds a user to a room
-        
+
         :param request: request.Request - the request object
         :type request: request.Request
         :param pk: The primary key of the room
@@ -208,15 +211,50 @@ class JoinRoomAPIView(APIView):
         """
 
         room = get_object_or_404(Room, pk=pk)
-        user = get_object_or_404(User, pk=id)
+        user = request.user
 
         room.members.add(user)
         room.save()
 
-        serializer_context = {"request": request}
-        serializer = self.serializer_class(room, context=serializer_context)
+        return Response(
+            {
+                "success": True, 
+                "room_joined": room.id, 
+                "message": "you have successfully joined the room"
+            }, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def leave_room(request: request.Request, pk):
+    try:
+        room = get_object_or_404(Room, pk=pk)
+        user = request.user
+
+        # Check if the user is a member of the quested group
+        search = room.members.filter(id=user.id)
+        if search.count() == 0:
+            raise BaseException("You are not a member of this room, Please check the admin of this room")
+        
+        # Remove user from the room
+        room.members.remove(user)
+        room.save()
+
+        return Response(
+            {
+                "success": True, 
+                "room_joined": room.id, 
+                "message": "you have successfully removed from the room"
+            }, status=status.HTTP_200_OK)
+    except BaseException as e:
+        return Response(
+            {
+                "success": False, 
+                "message": "Unable to process your request please try again",
+                "error": f'{e}'
+            }
+            , status=status.HTTP_400_BAD_REQUEST)
 
 
 # TASK:
@@ -229,6 +267,7 @@ class TaskListAPIView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Task.objects.all().order_by("id")
     serializer_class = TaskSerializer
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -243,7 +282,7 @@ def getTask(request, pk):
     marks = []
     if task:
         marks = list(Mark.objects.filter(task=task).values())
-    
+
     total = 0
     for i in marks:
         total += i['mark']
@@ -251,9 +290,9 @@ def getTask(request, pk):
         total /= len(marks)
         total = round(total, 2)
 
-    dict_obj = model_to_dict( task )
+    dict_obj = model_to_dict(task)
 
-    return JsonResponse(data= {"task": dict_obj, "avarage": total, "marks": marks}, safe=False)
+    return JsonResponse(data={"task": dict_obj, "avarage": total, "marks": marks}, safe=False)
 
 
 @api_view(['GET'])
@@ -270,8 +309,9 @@ def get_tasks_from_room(request, id):
         tasks = list(Task.objects.filter(room=room).values())
     else:
         tasks = []
-    
+
     return JsonResponse(data=tasks, safe=False)
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
@@ -288,7 +328,7 @@ def get_users_from_room(request, id):
 
     else:
         members = []
-    
+
     return JsonResponse(data=members, safe=False)
 
 
@@ -315,7 +355,7 @@ def get_marks_from_tasks(request, id):
 def get_stories_in_task(request, id):
     """
     It takes a task id, finds the task, and returns a list of all the stories associated with that task
-    
+
     :param request: The request object
     :param id: the id of the task
     :return: A list of dictionaries.
