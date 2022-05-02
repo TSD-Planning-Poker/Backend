@@ -25,11 +25,25 @@ class RoomsUpdateAndDetailsView(APIView):
     serializer_class = RoomSerializer
 
     def get(self, request, pk):
+        """
+        It gets a room with the given id, serializes it, and returns it
+        
+        :param request: The request object is used to get the request data
+        :param pk: The primary key of the room we want to retrieve
+        :return: The room object is being returned.
+        """
         room = Room.objects.get(id=pk)
         serializer = RoomDetailSerializer(room, many=False)
         return Response(serializer.data)
 
     def put(self, request, pk):
+        """
+        If the room exists, update the room's name and description, and return the room's dictionary
+        
+        :param request: The request object
+        :param pk: The primary key of the room to be updated
+        :return: A JsonResponse object is being returned.
+        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         room = Room.objects.filter(id=pk)
@@ -141,10 +155,22 @@ class RoomListCreateAPIView(APIView):
     serializer_class = RoomSerializer
 
     def get(self, request):
+        """
+        It returns a list of all the rooms in the database, ordered by their id, in JSON format
+        
+        :param request: The request object
+        :return: A list of all the rooms in the database.
+        """
         rooms = list(Room.objects.all().order_by("id").values())
         return JsonResponse(data=rooms, safe=False)
 
     def post(self, request):
+        """
+        We create a new room object, and then we return a dictionary representation of that room object
+        
+        :param request: The request object
+        :return: A JsonResponse object.
+        """
         serializer = self.serializer_class(data=request.data)
         # rooms = Room.objects.all().order_by("id")
         serializer.is_valid(raise_exception=True)
@@ -171,6 +197,15 @@ class JoinRoomAPIView(APIView):
 
     @transaction.atomic
     def get(self, request: request.Request, pk, id):
+        """
+        It adds a user to a room
+        
+        :param request: request.Request - the request object
+        :type request: request.Request
+        :param pk: The primary key of the room
+        :param id: The id of the user to add to the room
+        :return: The room object with the new member added.
+        """
 
         room = get_object_or_404(Room, pk=pk)
         user = get_object_or_404(User, pk=id)
