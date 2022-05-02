@@ -1,14 +1,13 @@
 from django.urls import path
 from . import views
-from .views import leave_room, get_stories_in_task, UserStoriesUpdateAndDetailsApiView, UserStoriesApiView, RoomsUpdateAndDetailsView, RoomListCreateAPIView, JoinRoomAPIView, MarkListAPIView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
-
+from .views import leave_room, get_stories_in_task, UserStoriesUpdateAndDetailsApiView, UserStoriesApiView, RoomsUpdateAndDetailsView, RoomListCreateAPIView, MarkListAPIView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
+from .room_views import RoomInvitations, AcceptInviteApiView
 
 urlpatterns = [
     path('rooms/', RoomListCreateAPIView.as_view(), name="room-list"),
     path('rooms/<int:id>/alltasks/', get_tasks_from_room, name="room-alltasks"),
     path('rooms/<int:id>/allusers/', get_users_from_room, name="room-alltasks"),
     path('rooms/<int:pk>/', RoomsUpdateAndDetailsView.as_view(), name="room-detail"),
-    path('rooms/<int:pk>/join/', JoinRoomAPIView.as_view(), name="room-join"),
     path('rooms/<int:pk>/leave/', leave_room, name="room-join"),
 
     path('tasks/<int:id>/allmarks', get_marks_from_tasks, name="mark-listmark"),
@@ -21,5 +20,8 @@ urlpatterns = [
 
     path('stories/', UserStoriesApiView.as_view(), name="stories"),
     path('stories/<int:story_id>/', UserStoriesUpdateAndDetailsApiView.as_view(), name="stories-id"),
+
+    path('invitations/', RoomInvitations.as_view(), name="invitations"),
+    path('invitations/<str:invitation_code>/accept/', AcceptInviteApiView.as_view(), name="accept_invitations"),
 
 ]

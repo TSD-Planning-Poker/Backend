@@ -1,6 +1,6 @@
 from dataclasses import field
 from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField, Serializer
-from base.models import Room, Deck, Task, User, Mark, UserStories
+from base.models import Invitation, Room, Deck, Task, User, Mark, UserStories
 from django.db import models
 from django.http import JsonResponse
 from rest_framework import serializers
@@ -18,6 +18,11 @@ class StringLookupField(StringRelatedField):
     def to_internal_value(self, data):
         obj = self.model.objects.filter(**{self.field: data}).first()
         return obj.id
+
+class InvitationsSerializer(ModelSerializer):
+    class Meta:
+        model = Invitation
+        exclude = ["updated_at", "created_at", "from_user", "code", "accepted"]
 
 # ROOM:
 class RoomSerializer(ModelSerializer):

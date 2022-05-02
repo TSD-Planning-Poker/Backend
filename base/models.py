@@ -22,7 +22,6 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-
 class Room(BaseModel):
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200)
@@ -33,6 +32,17 @@ class Room(BaseModel):
 
     def __str__(self):
         return self.name
+
+class Invitation(BaseModel):
+    from_user = models.ForeignKey(to=User, null=False, on_delete=models.DO_NOTHING, related_name='from_user_id')
+    to_user = models.ForeignKey(to=User, null=False, on_delete=models.DO_NOTHING, related_name='to_user')
+    room = models.ForeignKey(to=Room, null=False,  on_delete=models.DO_NOTHING)
+    code = models.CharField( unique=True, max_length=300, null=False)
+    accepted = models.BooleanField(default=False, null=False)
+
+    def __str__(self):
+        return self.code
+
 class Deck(BaseModel):
     name = models.CharField(max_length=200)
     # room = models.ForeignKey(Room, on_delete=models.SET_NULL, null=True)
