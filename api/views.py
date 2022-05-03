@@ -1,4 +1,5 @@
 import json
+from tkinter import Y
 from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -350,15 +351,53 @@ def get_tasks_in_story(request, id):
 
 
 # MARK:
-class MarkListAPIView(generics.ListCreateAPIView):
+class MarkListAPIView(CustomAPIView):
     """
     List all marks 
     Method: Get
     """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Mark.objects.all().order_by("id")
     serializer_class = MarkSerializer
+
+    def get(self, request: request.Request):
+        marks = Mark.objects.filter(evaluator=request.user).values("mark", "user_story", "user_story__room__name","user_story__room__id", "user_story__title","evaluator", "evaluator__username")
+        return Response(data={
+                        "success": True,
+                        "message": "Successfully fetched marks",
+                        "data": marks
+                    }, status=status.HTTP_200_OK)
+        
+
+    def post(self, request: request.Request):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=False)
+            user_story_to_evaluate = UserStory.objects.filter(id=serializer.data['user_story'])
+
+            if not user_story_to_evaluate:
+                raise BaseException('Canot not find the user story to be evaluated!')                
+
+            search = Mark.objects.filter(evaluator=request.user, user_story = user_story_to_evaluate )
+            if search.count() > 0:
+                raise BaseException('User story is already evaluated by the user!')
+
+            mark = Mark.objects.create(
+                user_story = user_story_to_evaluate,
+                mark = float(str(serializer.data['mark'])),
+                evaluator = request.user
+            )
+
+            mark = model_to_dict(mark)
+            return Response(data={
+                        "success": True,
+                        "message": "Successfully evaluated a story",
+                        "data": mark
+                    }, status=status.HTTP_200_OK)
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": "Failed to evaluate a user story!",
+                    "error": f'{e}'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
