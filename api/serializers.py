@@ -84,9 +84,14 @@ class TaskDetailSerializer(ModelSerializer):
 class MarkSerializer(ModelSerializer):
     class Meta:
         model = Mark
-        exclude = ["updated_at", "created_at", "evaluator"]
+        exclude = ["updated_at", "created_at", ]
 
 class MarkDetailSerializer(ModelSerializer):
     class Meta:
         model = Mark
         fields = "__all__"
+
+class MarkUpdateSerializer(ModelSerializer):
+    class Meta:
+        model = Mark
+        exclude = ["updated_at", "created_at", "evaluator","user_story"]

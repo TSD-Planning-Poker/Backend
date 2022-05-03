@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('marks/', views.MarkListAPIView.as_view(), name="mark-list"),
     path('marks/<int:pk>/', views.getMark, name="mark-detail"),
+    path('marks/<int:pk>/update', views.updateMark, name="mark-detail"),
 
     path('stories/', views.UserStoriesApiView.as_view(), name="stories"),
     path('stories/<int:id>/tasks', views.get_tasks_in_story, name="stories_in_task"),

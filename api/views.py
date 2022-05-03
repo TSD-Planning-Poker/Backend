@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.room_views import CustomAPIView
 from base.models import Room, Task, Mark, UserStory
-from .serializers import UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
+from .serializers import MarkUpdateSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -412,3 +412,27 @@ def getMark(request, pk):
     mark = Mark.objects.get(id=pk)
     serializer = MarkDetailSerializer(mark, many=False)
     return Response(serializer.data)
+
+
+@api_view(['PUT'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def updateMark(request, pk):
+    """
+    Get mark details 
+    Method: GET
+    Accepts: mark_id
+    """
+    serializer = MarkUpdateSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    mark = Mark.objects.get(id=pk)
+    mark.mark = serializer.data['mark']
+    mark.save()
+
+    mark = model_to_dict(mark)
+    return Response(data={
+                        "success": True,
+                        "message": "Successfully updated a mark",
+                        "data": mark
+                    }, status=status.HTTP_200_OK)
