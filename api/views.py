@@ -166,7 +166,13 @@ class RoomListCreateAPIView(APIView):
         :param request: The request object
         :return: A list of all the rooms in the database.
         """
-        rooms = Room.objects.filter(host=request.user)
+        search = request.GET.get('search', None)
+        if search:
+            print('--------searching--------', search)
+            rooms = Room.objects.filter(host=request.user, name__contains=search)
+        else:
+            rooms = Room.objects.filter(host=request.user)
+
         data = RoomListSerializer(rooms, many=True).data
         
         return JsonResponse(data=data, safe=False)
