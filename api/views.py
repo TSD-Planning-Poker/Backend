@@ -2,8 +2,9 @@ import json
 from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from base.models import Room, Task, Deck, Mark, UserStories
-from .serializers import UserStoriesDetailsSerializer, AddMarksSerializer, JoinRoomSerializer, RoomSerializer, MarkSerializer, TaskSerialiser2, TaskSerializer, RoomDetailSerializer, TaskDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
+from api.room_views import CustomAPIView
+from base.models import Room, Task, Mark, UserStory
+from .serializers import UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -75,7 +76,7 @@ class UserStoriesApiView(APIView):
         :param request: The request object is a standard Django request object
         :return: The list of all the values in the UserStories table.
         """
-        room = list(UserStories.objects.all().values())
+        room = list(UserStory.objects.all().values())
         return Response(room)
 
     def post(self, request):
@@ -89,10 +90,10 @@ class UserStoriesApiView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        story = UserStories.objects.create(
+        story = UserStory.objects.create(
+            room = Room.objects.get(id=serializer.data['room']),
             title=serializer.data['title'],
             description=serializer.data['description'],
-            related_task=Task.objects.get(id=serializer.data['related_task']),
             created_by=request.user
         )
 
@@ -117,7 +118,7 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
         :param story_id: The id of the story you want to get
         :return: The user story is being returned.
         """
-        room = UserStories.objects.filter(id=story_id)
+        room = UserStory.objects.filter(id=story_id)
         if room.count() > 0:
             room = room.values().first()
             return Response(room)
@@ -137,7 +138,7 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        story = UserStories.objects.get(id=story_id)
+        story = UserStory.objects.get(id=story_id)
 
         if story:
             story.title = serializer.data['title']
@@ -175,7 +176,6 @@ class RoomListCreateAPIView(APIView):
         :return: A JsonResponse object.
         """
         serializer = self.serializer_class(data=request.data)
-        # rooms = Room.objects.all().order_by("id")
         serializer.is_valid(raise_exception=True)
         room = Room.objects.create(
             name=serializer.data['name'],
@@ -223,59 +223,72 @@ def leave_room(request: request.Request, pk):
 
 
 # TASK:
-class TaskListAPIView(generics.ListCreateAPIView):
+class TaskListAPIView(CustomAPIView):
     """
     List all tasks
     Method: GET
     """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-    queryset = Task.objects.all().order_by("id")
+    
     serializer_class = TaskSerializer
 
+    def get(self, request):
+        tasks = list(Task.objects.all().values())
+        return JsonResponse(data=tasks, safe=False)
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        task = Task.objects.create(
+            title=serializer.data['title'],
+            description=serializer.data['description'],
+            user_story=UserStory.objects.get(id=serializer.data['user_story']),
+            created_by = request.user
+        )
+        task_dict = model_to_dict(task)
+
+        return JsonResponse(data=task_dict, safe=False)
+
+
+class TasksDetailsAndUpdateApiView(CustomAPIView):
+
+    def get(self, request, pk):
+        task = Task.objects.get(id=pk)
+        dict_obj = model_to_dict(task)
+        return JsonResponse(data=dict_obj, safe=False)
+
+    def delete(self, request, pk):
+        try:
+            task = Task.objects.get(id=pk)
+            task.delete()
+            return Response(data={
+                        "success": True,
+                        "message": "Successfully delete task",
+                    }, status=status.HTTP_200_OK)
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": "Task does not exist!",
+                    "error": f'{e}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def getTask(request, pk):
-    """ 
-    Get task details with marks and average mark
-    Method: Get
-    Accepts: (int) Task_id
+def get_userstories_from_room(request, id):
     """
-    task = Task.objects.get(id=pk)
-    marks = []
-    if task:
-        marks = list(Mark.objects.filter(task=task).values())
-
-    total = 0
-    for i in marks:
-        total += i['mark']
-    if len(marks) > 0:
-        total /= len(marks)
-        total = round(total, 2)
-
-    dict_obj = model_to_dict(task)
-
-    return JsonResponse(data={"task": dict_obj, "avarage": total, "marks": marks}, safe=False)
-
-
-@api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def get_tasks_from_room(request, id):
-    """
-    List tasks in a room
+    List stories in a room
     Method: Get
     Accepts: room_id
     """
     room = Room.objects.filter(id=id).first()
     if room:
-        tasks = list(Task.objects.filter(room=room).values())
+        user_stories = list(UserStory.objects.filter(room=room).values())
     else:
-        tasks = []
+        user_stories = []
 
-    return JsonResponse(data=tasks, safe=False)
+    return JsonResponse(data=user_stories, safe=False)
 
 
 @api_view(['GET'])
@@ -300,15 +313,15 @@ def get_users_from_room(request, id):
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def get_marks_from_tasks(request, id):
+def get_marks_from_userstories(request, id):
     """
     List  marks assigned for a task
     Metod: Get
     Accepts: task_id
     """
-    task = Task.objects.filter(id=id).first()
-    if task:
-        marks = list(Mark.objects.filter(task=task).values())
+    user_story = UserStory.objects.filter(id=id).first()
+    if user_story:
+        marks = list(Mark.objects.filter(user_story=user_story).values())
     else:
         marks = []
     return JsonResponse(data=marks, safe=False)
@@ -317,7 +330,7 @@ def get_marks_from_tasks(request, id):
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def get_stories_in_task(request, id):
+def get_tasks_in_story(request, id):
     """
     It takes a task id, finds the task, and returns a list of all the stories associated with that task
 
@@ -325,12 +338,12 @@ def get_stories_in_task(request, id):
     :param id: the id of the task
     :return: A list of dictionaries.
     """
-    task = Task.objects.filter(id=id).first()
-    if task:
-        stories = list(task.userstories_set.all().values())
+    story = UserStory.objects.filter(id=id).first()
+    if story:
+        tasks = list(story.task_set.all().values())
     else:
-        stories = []
-    return JsonResponse(data=stories, safe=False)
+        tasks = []
+    return JsonResponse(data=tasks, safe=False)
 
 
 # MARK:

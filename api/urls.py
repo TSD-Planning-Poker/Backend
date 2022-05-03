@@ -1,25 +1,24 @@
 from django.urls import path
 from . import views
-from .views import leave_room, get_stories_in_task, UserStoriesUpdateAndDetailsApiView, UserStoriesApiView, RoomsUpdateAndDetailsView, RoomListCreateAPIView, MarkListAPIView, TaskListAPIView, TaskListAPIView, get_users_from_room, get_marks_from_tasks, get_tasks_from_room
 from .room_views import RoomInvitations, AcceptInviteApiView
 
 urlpatterns = [
-    path('rooms/', RoomListCreateAPIView.as_view(), name="room-list"),
-    path('rooms/<int:id>/alltasks/', get_tasks_from_room, name="room-alltasks"),
-    path('rooms/<int:id>/allusers/', get_users_from_room, name="room-alltasks"),
-    path('rooms/<int:pk>/', RoomsUpdateAndDetailsView.as_view(), name="room-detail"),
-    path('rooms/<int:pk>/leave/', leave_room, name="room-join"),
+    path('rooms/', views.RoomListCreateAPIView.as_view(), name="room-list"),
+    path('rooms/<int:id>/userstories/', views.get_userstories_from_room, name="room_userstories"),
+    path('rooms/<int:id>/allusers/', views.get_users_from_room, name="room-alltasks"),
+    path('rooms/<int:pk>/', views.RoomsUpdateAndDetailsView.as_view(), name="room-detail"),
+    path('rooms/<int:pk>/leave/', views.leave_room, name="room-join"),
 
-    path('tasks/<int:id>/allmarks', get_marks_from_tasks, name="mark-listmark"),
-    path('tasks/<int:id>/stories', get_stories_in_task, name="stories_in_task"),
-    path('tasks/', TaskListAPIView.as_view(), name="task-list"),
-    path('tasks/<int:pk>/', views.getTask, name="task-detail"),
+    path('tasks/', views.TaskListAPIView.as_view(), name="task-list"),
+    path('tasks/<int:pk>/', views.TasksDetailsAndUpdateApiView.as_view(), name="task-detail"),
 
-    path('marks/', MarkListAPIView.as_view(), name="mark-list"),
+    path('marks/', views.MarkListAPIView.as_view(), name="mark-list"),
     path('marks/<int:pk>/', views.getMark, name="mark-detail"),
 
-    path('stories/', UserStoriesApiView.as_view(), name="stories"),
-    path('stories/<int:story_id>/', UserStoriesUpdateAndDetailsApiView.as_view(), name="stories-id"),
+    path('stories/', views.UserStoriesApiView.as_view(), name="stories"),
+    path('stories/<int:id>/tasks', views.get_tasks_in_story, name="stories_in_task"),
+    path('stories/<int:id>/allmarks', views.get_marks_from_userstories, name="mark-listmark"),
+    path('stories/<int:story_id>/', views.UserStoriesUpdateAndDetailsApiView.as_view(), name="stories-id"),
 
     path('invitations/', RoomInvitations.as_view(), name="invitations"),
     path('invitations/<str:invitation_code>/accept/', AcceptInviteApiView.as_view(), name="accept_invitations"),

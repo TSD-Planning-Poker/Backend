@@ -1,6 +1,6 @@
 from dataclasses import field
 from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField, Serializer
-from base.models import Invitation, Room, Deck, Task, User, Mark, UserStories
+from base.models import Invitation, Room, Deck, Task, User, Mark, UserStory
 from django.db import models
 from django.http import JsonResponse
 from rest_framework import serializers
@@ -33,13 +33,13 @@ class RoomSerializer(ModelSerializer):
 
 class UserStoriesSerializer(ModelSerializer):
     class Meta:
-        model = UserStories
+        model = UserStory
         exclude = ["updated_at", "created_at", "created_by"]
 
 class UserStoriesDetailsSerializer(ModelSerializer):
     class Meta:
-        model = UserStories
-        exclude = ["updated_at", "created_at", "created_by", "related_task"]
+        model = UserStory
+        exclude = ["updated_at", "created_at", "created_by", "room"]
 
 class JoinRoomSerializer(Serializer):
     room = Room
@@ -73,7 +73,7 @@ class RoomDetailSerializer(ModelSerializer):
 class TaskSerializer(ModelSerializer):
     class Meta:
         model = Task
-        exclude = ["updated_at", "created_at"]
+        exclude = ["updated_at", "created_at", "created_by"]
 
 class TaskDetailSerializer(ModelSerializer):
     class Meta:
