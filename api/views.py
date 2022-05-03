@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.room_views import CustomAPIView
 from base.models import Room, Task, Mark, UserStory
-from .serializers import MarkUpdateSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
+from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -166,8 +166,10 @@ class RoomListCreateAPIView(APIView):
         :param request: The request object
         :return: A list of all the rooms in the database.
         """
-        rooms = list(Room.objects.all().order_by("id").values())
-        return JsonResponse(data=rooms, safe=False)
+        rooms = Room.objects.filter(host=request.user)
+        data = RoomListSerializer(rooms, many=True).data
+        
+        return JsonResponse(data=data, safe=False)
 
     def post(self, request):
         """

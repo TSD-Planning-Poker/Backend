@@ -27,6 +27,7 @@ class Room(BaseModel):
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
     members = models.ManyToManyField(User, related_name='members', blank=True)
+    closed = models.BooleanField(default=False)
     
     objects = BaseModelManager()
 

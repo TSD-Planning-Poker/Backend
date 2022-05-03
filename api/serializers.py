@@ -95,3 +95,16 @@ class MarkUpdateSerializer(ModelSerializer):
     class Meta:
         model = Mark
         exclude = ["updated_at", "created_at", "evaluator","user_story"]
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = '__all__'
+        model = User
+
+class RoomListSerializer(serializers.ModelSerializer):
+    member = UserSerializer(read_only=True, many=True)
+    class Meta:
+        fields = '__all__'
+        model = Room
