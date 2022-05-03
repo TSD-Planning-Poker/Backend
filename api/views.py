@@ -253,9 +253,12 @@ class TaskListAPIView(CustomAPIView):
 class TasksDetailsAndUpdateApiView(CustomAPIView):
 
     def get(self, request, pk):
-        task = Task.objects.get(id=pk)
-        dict_obj = model_to_dict(task)
-        return JsonResponse(data=dict_obj, safe=False)
+        try:
+            task = Task.objects.get(id=pk)
+            dict_obj = model_to_dict(task)
+            return JsonResponse(data=dict_obj, safe=False)
+        except BaseException as e:
+            return JsonResponse(data={"error": f"{e}"}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         try:
