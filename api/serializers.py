@@ -41,6 +41,11 @@ class UserStoriesDetailsSerializer(ModelSerializer):
         model = UserStory
         exclude = ["updated_at", "created_at", "created_by", "room"]
 
+class UserStoriesExportSerializer(ModelSerializer):
+    class Meta:
+        model = UserStory
+        exclude = ["room", "title", "updated_at"]
+
 class JoinRoomSerializer(Serializer):
     room = Room
     user = User

@@ -24,4 +24,6 @@ urlpatterns = [
     path('invitations/', RoomInvitations.as_view(), name="invitations"),
     path('invitations/<str:invitation_code>/accept/', AcceptInviteApiView.as_view(), name="accept_invitations"),
 
+    path('export/', views.ExportCSV.as_view(), name="export"),
+
 ]
