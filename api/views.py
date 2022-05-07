@@ -500,4 +500,4 @@ class ChangePassword(APIView):
         return Response(data={
                             "success": False,
                             "message": "Only admin user can change password",
-                        }, status=status.HTTP_200_OK)
+                        }, status=status.HTTP_401_UNAUTHORIZED)
