@@ -449,37 +449,7 @@ def updateMark(request, pk):
 
 
 
-# FILE:
-class ExportCSV(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        """
-        Export csv file for Jira (default delimeter is '$')
-        Method: GET
-        Accepts: mark_id
-        """
-        stories = UserStory.objects.all().only('created_at','description','created_by')
-        delimeter = '$'
-
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="export.csv"'
-
-        writer = csv.writer(response)
-
-        header = ('Issue Type','Summary','Reporter','Created')
-        header = delimeter.join(header)
-        writer.writerow([header])
-
-        for story in stories:
-            user = User.objects.get(id=story.created_by_id)
-            row = ('Story', story.description, user.username, story.created_at.strftime("%d/%b/%y"))
-            row = delimeter.join(row)
-            writer.writerow([row])
-        
-        return response 
-        
+# FILE:        
 class ExportCSV_withDelimeter(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
