@@ -479,3 +479,25 @@ class ExportCSV_withDelimeter(APIView):
             writer.writerow([row])
         
         return response 
+
+
+# UPDATE PASSWORD:
+class ChangePassword(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def put(self, request, pk):
+        
+        if request.user.is_superuser:
+            user = User.objects.get(id=pk)
+            user.set_password(request.data['password'])
+            user.save()
+
+            return Response(data={
+                            "success": True,
+                            "message": "Successfully changed password",
+                        }, status=status.HTTP_200_OK)
+        return Response(data={
+                            "success": False,
+                            "message": "Only admin user can change password",
+                        }, status=status.HTTP_200_OK)
