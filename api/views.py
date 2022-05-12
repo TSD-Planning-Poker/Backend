@@ -1,3 +1,4 @@
+from asyncore import write
 import json
 from tkinter import Y
 from unicodedata import name
@@ -5,19 +6,20 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.room_views import CustomAPIView
 from base.models import Room, Task, Mark, UserStory
-from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
+from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, UserStoriesExportSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
 from rest_framework.generics import get_object_or_404, ListCreateAPIView
 from django.db import transaction
 from django.contrib.auth.models import AbstractUser, User
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.forms.models import model_to_dict
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import authentication_classes, permission_classes
-
+import csv
+import datetime
 
 class RoomsUpdateAndDetailsView(APIView):
     """ List all room """
@@ -444,3 +446,36 @@ def updateMark(request, pk):
                         "message": "Successfully updated a mark",
                         "data": mark
                     }, status=status.HTTP_200_OK)
+
+
+
+# FILE:        
+class ExportCSV_withDelimeter(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, delimeter):
+        """
+        Export csv file for Jira with given delimeter
+        Method: GET
+        Accepts: mark_id
+        """
+        stories = UserStory.objects.all().only('created_at','description','created_by')
+        delimtr = delimeter
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="export.csv"'
+
+        writer = csv.writer(response)
+
+        header = ('Issue Type','Summary','Reporter','Created')
+        header = delimtr.join(header)
+        writer.writerow([header])
+
+        for story in stories:
+            user = User.objects.get(id=story.created_by_id)
+            row = ('Story', story.description, user.username, story.created_at.strftime("%d/%b/%y"))
+            row = delimtr.join(row)
+            writer.writerow([row])
+        
+        return response 
