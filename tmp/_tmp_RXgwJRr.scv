@@ -1,0 +1,28 @@
+Issue Type,Issue key,Issue id,Summary,Assignee,Assignee Id,Reporter,Reporter Id,Priority,Status,Resolution,Created,Updated,Due date
+"Story,PP-32,10031,""Mali mobile transmit dynamic Saladsdaf,sadfsadf,sdf,sdf,s,fd"",,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 6:05 PM,03/May/22 6:05 PM,"
+Story,PP-31,10030,Coordinator Progressive Liberia Engineer Mandatory,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 6:05 PM,03/May/22 6:05 PM,
+Story,PP-30,10029,payment grid-enabled Illinois,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 6:05 PM,03/May/22 6:05 PM,
+Story,PP-29,10028,Coordinator Progressive Liberia Engineer Mandatory,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 5:59 PM,03/May/22 5:59 PM,
+Story,PP-28,10027,payment grid-enabled Illinois,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 5:59 PM,03/May/22 5:59 PM,
+Story,PP-27,10026,Coordinator Progressive Liberia Engineer Mandatory,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 5:55 PM,03/May/22 5:55 PM,
+Story,PP-26,10025,payment grid-enabled Illinois,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,03/May/22 5:55 PM,03/May/22 5:55 PM,
+Story,PP-25,10024,NEWNENWENW,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 10:04 PM,02/May/22 10:04 PM,
+Story,PP-24,10023,NEWNENWENW,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 10:02 PM,02/May/22 10:02 PM,
+Story,PP-23,10022,Fix integration from 1st sprint,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-22,10021,Inviting system (to rooms),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-21,10020,CRUD for user story,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-20,10019,Assigning tasks to stories (1 to many),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-19,10018,Making estimations per task,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-18,10017,Managing estimations (admin can close current estimation session),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+"Story,PP-17,10016,""Importing/,exporting user stories from/,to Jira"",,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,"
+"Epik,PP-16,10015,""Inviting to rooms with accept or reject possibilities, leaving rooms. CRUD for stories and tasks' estimations. Assigning tasks to story. Coherence with Jira files"",,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,"
+Story,PP-15,10014,0,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:49 PM,02/May/22 8:49 PM,
+Story,PP-14,10013,0,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,02/May/22 8:41 PM,02/May/22 8:41 PM,
+"Epik,PP-8,10007,""Inviting to rooms with accept or reject possibilities, leaving rooms. CRUD for stories and tasks' estimations. Assigning tasks to story. Coherence with Jira files "",,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:34 PM,30/Apr/22 3:36 PM,"
+"Story,PP-7,10006,""Importing/,exporting user stories from/,to Jira"",,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:25 PM,02/May/22 7:34 PM,"
+Story,PP-6,10005,Managing estimations (admin can close current estimation session),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:24 PM,30/Apr/22 3:40 PM,
+Story,PP-5,10004,Making estimations per task,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:23 PM,30/Apr/22 3:39 PM,
+Story,PP-4,10003,Assigning tasks to stories (1 to many),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:23 PM,30/Apr/22 3:39 PM,
+Story,PP-3,10002,CRUD for user story,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:22 PM,30/Apr/22 3:39 PM,
+Story,PP-2,10001,Inviting system (to rooms),,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,To Do,,30/Apr/22 3:22 PM,30/Apr/22 3:39 PM,
+Story,PP-1,10000,Fix integration from 1st sprint,,,Wojciech Lewandowski,5cc03f80cf9b780e6a3a0e76,Medium,In Progress,,30/Apr/22 3:21 PM,02/May/22 7:34 PM,

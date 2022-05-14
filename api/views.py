@@ -17,7 +17,10 @@ from django.http import JsonResponse, HttpResponse
 from django.forms.models import model_to_dict
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.decorators import authentication_classes, permission_classes, action
+from rest_framework.response import Response
+from django.core.files.base import ContentFile
+from django.core.files.storage import FileSystemStorage
 import csv
 import datetime
 
@@ -480,7 +483,77 @@ class ExportCSV_withDelimeter(APIView):
         
         return response 
 
+FILE_STORAGE = FileSystemStorage(location='tmp/')
+class ImportCSV_withDelimeter(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
 
+    # @action(detail=False, methods='POST')
+    def post(self, request, delimeter):
+        """
+        Import csv file from Jira with given delimeter
+        Method: POST
+        Accepts: delimeter
+        """
+        try:
+            file = request.FILES["file"]
+            delimtr = str(delimeter)
+
+            content = file.read()
+            file_content = ContentFile(content)
+            file_name = FILE_STORAGE.save("_tmp.scv", file_content)
+            tmp_file = FILE_STORAGE.path(file_name)
+
+            csv_file = open(tmp_file, errors="ignore")
+            reader = csv.reader(csv_file, delimiter=delimtr)
+            # next(reader) # header row skipped
+
+            stories_list = []
+            get_fields = []
+            description = ""
+            created_by = ""
+            created_at = ""
+            for id, row in enumerate(reader):
+                if id == 0:
+                    for i, f in enumerate(row):
+                        if f == "Issue Type":
+                            get_fields.append(i)
+                        elif f == "Summary":
+                            get_fields.append(i)
+                        elif f == "Reporter":
+                            get_fields.append(i)
+                        elif f == "Created":
+                            get_fields.append(i)
+                else:
+                    if row[get_fields[0]] == "Story":
+                        description = row[get_fields[1]] 
+                        created_by = row[get_fields[2]] 
+                        created_at = row[get_fields[3]] 
+                        stories_list.append(
+                            UserStory(
+                                room = Room.objects.get(host=request.user),
+                                title = f"Story {id}: {description[:10]}",
+                                description = description,
+                                created_by = request.user,
+                                created_at = created_at,
+                                updated_at = datetime.date.today()
+                            )
+                        )
+            UserStory.objects.bulk_create(stories_list)
+
+            return Response(data={
+                            "success": True,
+                            "message": "Successfully uploaded data",
+                        }, status=status.HTTP_200_OK)
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": "Failed to upload file",
+                    "error": f'{e}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+ 
 # UPDATE PASSWORD:
 class ChangePassword(APIView):
     authentication_classes = [TokenAuthentication]
