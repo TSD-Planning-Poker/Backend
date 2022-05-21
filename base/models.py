@@ -56,6 +56,10 @@ class UserStory(BaseModel):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=False)
     title = models.CharField(max_length=200, null=False,)
     description = models.CharField(max_length=500, null=False,)
+    current_session = models.BooleanField(null=True, default=False)
+    completed = models.BooleanField(null=True, default=False)
+    evaluated = models.BooleanField(null=True, default=False)
+    final_mark = models.FloatField(null=True, default=0.0)
     created_by = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=True)
 
     def __str__(self):
@@ -72,6 +76,7 @@ class Task(BaseModel):
 class Mark(BaseModel):
     mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     user_story = models.ForeignKey(UserStory, on_delete=models.CASCADE)
+    completed = models.BooleanField(null=True, default=False)
     evaluator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
 
     def __str__(self):

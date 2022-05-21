@@ -30,6 +30,21 @@ def logout_view(request):
     return Response(data={"token": key}, status=HTTPStatus.ACCEPTED)
 
 
+@api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def allusers_view(request):
+    """
+    Fetch all users
+    """
+    if request.user.is_superuser:
+        users = User.objects.all().values("id", "username", "is_staff", "is_superuser", "email")
+        return Response(data=users, status=HTTPStatus.ACCEPTED)
+        
+    else:
+        return Response(status=HTTPStatus.FORBIDDEN)
+
+
 class ProfileApiView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]

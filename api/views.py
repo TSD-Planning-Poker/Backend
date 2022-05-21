@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from api.room_views import CustomAPIView
 from base.models import Room, Task, Mark, UserStory
 from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, UserStoriesExportSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
+from .serializers import FinaliseStorySerializer, MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
 from rest_framework import generics, status, viewsets, request
 from rest_framework.views import APIView
@@ -62,6 +63,63 @@ class RoomsUpdateAndDetailsView(APIView):
             return JsonResponse(data=room_dict, safe=False)
         else:
             return Response("Resource not found", status=status.HTTP_200_OK)
+
+
+
+class StartUserStorySessionApiView(APIView):
+    """ List all room """
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    # serializer_class = UserStoriesSerializer
+
+    def post(self, request, story_id):
+        
+        try:
+            count = 0
+            if not request.user.is_superuser:
+                raise "You are not Authorised to start session!"
+
+            active_stories = UserStory.objects.filter(current_session=True)
+            for stories in active_stories:
+                stories.current_session = False
+                stories.save()
+
+            story = UserStory.objects.get(id=story_id)
+            story.current_session = True
+            story.save()
+
+            room = story.room
+            members = room.members.all()
+
+            for member in members:
+                member_mark = Mark.objects.filter(evaluator=member, user_story=story)
+                if member_mark.count() == 0:
+                    Mark.objects.create(
+                            user_story = story,
+                            mark = 0,
+                            evaluator = member
+                        )
+                else:
+                    if member_mark.first().mark > 0:
+                        count += 1
+            if count == len(members) and story.completed is not True:
+                story.evaluated = True
+                story.save()
+
+            return Response(
+                {
+                    "success": True, 
+                    "message": "Session started successfully"
+                }, status=status.HTTP_200_OK)
+
+        except BaseException as e:
+            return Response(
+                        {
+                            "success": False, 
+                            "error": f"Error: {e}"
+                        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserStoriesApiView(APIView):
@@ -335,7 +393,17 @@ def get_marks_from_userstories(request, id):
     """
     user_story = UserStory.objects.filter(id=id).first()
     if user_story:
-        marks = list(Mark.objects.filter(user_story=user_story).values())
+        if request.user.is_superuser:
+            marks = list(Mark.objects.filter(user_story=user_story).values("id", "mark", "evaluator__username", "evaluator__email",))
+        else:
+            if user_story.completed:
+                marks = list(Mark.objects.filter(user_story=user_story).values("id", "mark", "evaluator__username", "evaluator__email",))
+            else:
+                marks = list(Mark.objects.filter(user_story=user_story).values("id", "evaluator__username", "evaluator__email",))
+    
+        for mark in marks:
+            if mark['evaluator__username'] == request.user.username:
+                mark['mark'] = Mark.objects.get(user_story=user_story, evaluator=request.user).mark
     else:
         marks = []
     return JsonResponse(data=marks, safe=False)
@@ -410,6 +478,35 @@ class MarkListAPIView(CustomAPIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class FinaliseUSerStoryApiView(CustomAPIView):
+
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = FinaliseStorySerializer
+
+    def post(self, request, story_id):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            if not request.user.is_superuser:
+                raise BaseException('You are not authorised to finilise a user story!')
+            story = UserStory.objects.get(id=story_id)
+            story.final_mark = serializer.data['final_mark']
+            story.completed = True
+            story.evaluated = True
+            story.save()
+            return Response(data={
+                        "success": True,
+                        "message": "Successfully finalised Story!",
+                    }, status=status.HTTP_200_OK)
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": "Story Cound not be finalised",
+                    "error": f'{e}'
+                }, status=status.HTTP_400_BAD_REQUEST)
+
 @api_view(['GET'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
@@ -433,23 +530,31 @@ def updateMark(request, pk):
     Method: GET
     Accepts: mark_id
     """
-    serializer = MarkUpdateSerializer(data=request.data)
-    serializer.is_valid(raise_exception=True)
+    try:
+        serializer = MarkUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-    mark = Mark.objects.get(id=pk)
-    mark.mark = serializer.data['mark']
-    mark.save()
+        mark = Mark.objects.get(id=pk)
+        
+        if request.user == mark.evaluator:
+            mark.mark = serializer.data['mark']
+            mark.save()
+        else:
+            raise BaseException('You are not authorised to update this mark')
 
-    mark = model_to_dict(mark)
-    return Response(data={
+        mark = model_to_dict(mark)
+        return Response(data={
                         "success": True,
                         "message": "Successfully updated a mark",
                         "data": mark
                     }, status=status.HTTP_200_OK)
 
-
-
-# FILE:        
+    except BaseException as e:
+        return Response(data={
+                        "success": False,
+                        "message": f"{e}",
+                        "error": "Please contact the admin." 
+                    }, status=status.HTTP_400_BAD_REQUEST)       
 class ExportCSV_withDelimeter(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -501,3 +606,4 @@ class ChangePassword(APIView):
                             "success": False,
                             "message": "Only admin user can change password",
                         }, status=status.HTTP_401_UNAUTHORIZED)
+

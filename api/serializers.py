@@ -1,4 +1,5 @@
 from dataclasses import field
+from email.policy import default
 from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField, Serializer
 from base.models import Invitation, Room, Deck, Task, User, Mark, UserStory
 from django.db import models
@@ -30,6 +31,8 @@ class RoomSerializer(ModelSerializer):
         model = Room
         exclude = ["updated_at", "created_at", "members"]
 
+class FinaliseStorySerializer(serializers.Serializer):
+    final_mark = serializers.FloatField()
 
 class UserStoriesSerializer(ModelSerializer):
     class Meta:
