@@ -23,6 +23,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 import csv
 import datetime
+import codecs
 
 class RoomsUpdateAndDetailsView(APIView):
     """ List all room """
