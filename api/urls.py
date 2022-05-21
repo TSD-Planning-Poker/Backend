@@ -17,9 +17,11 @@ urlpatterns = [
     path('marks/<int:pk>/update', views.updateMark, name="mark-detail"),
 
     path('stories/', views.UserStoriesApiView.as_view(), name="stories"),
+    path('stories/startsession/<int:story_id>', views.StartUserStorySessionApiView.as_view(), name="start-session"),
     path('stories/<int:id>/tasks', views.get_tasks_in_story, name="stories_in_task"),
     path('stories/<int:id>/allmarks', views.get_marks_from_userstories, name="mark-listmark"),
     path('stories/<int:story_id>/', views.UserStoriesUpdateAndDetailsApiView.as_view(), name="stories-id"),
+    path('stories/<int:story_id>/finalise/', views.FinaliseUSerStoryApiView.as_view(), name="finalise_stories"),
 
     path('invitations/', RoomInvitations.as_view(), name="invitations"),
     path('invitations/<str:invitation_code>/accept/', AcceptInviteApiView.as_view(), name="accept_invitations"),

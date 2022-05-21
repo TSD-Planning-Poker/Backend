@@ -24,5 +24,6 @@ from .views import logout_view, ProfileApiView
 urlpatterns = [
     path('login/', views.obtain_auth_token, name="log_in"),
     path('logout/', auth_views.logout_view, name="log_out"),
+    path('allusers/', auth_views.allusers_view, name="all_users"),
     path('profile/', ProfileApiView.as_view(), name="profile")
 ]
