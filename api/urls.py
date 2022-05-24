@@ -27,6 +27,7 @@ urlpatterns = [
     path('invitations/<str:invitation_code>/accept/', AcceptInviteApiView.as_view(), name="accept_invitations"),
 
     path('export/<str:delimeter>/', views.ExportCSV_withDelimeter.as_view(), name="export_with_delimeter"),
+    path('import/<str:delimeter>/', views.ImportCSV_withDelimeter.as_view(), name="impoer_with_delimeter"),
 
     path('change_password/<int:pk>/', views.ChangePassword.as_view(), name="change_password"),
 
