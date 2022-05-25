@@ -36,7 +36,10 @@ class RoomInvitations(CustomAPIView):
         :param request: The request object
         :return: A list of dictionaries.
         """
-        invitations = Invitation.objects.filter(to_user=request.user).values()
+        
+        invitations = Invitation.objects.filter(to_user=request.user, accepted=False).values("id", "from_user__username", 
+        "room_id__name", "accepted", "created_at", "code")
+
         return Response(data=invitations, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -51,7 +54,7 @@ class RoomInvitations(CustomAPIView):
             
             room = Room.objects.get(id=serializer.data['room'])
             invitation_to_user = User.objects.get(id=serializer.data['to_user'])
-
+            
             if room.host == request.user:
                 self.check_if_already_a_member(room, invitation_to_user)
                 invitation = Invitation.objects.create(
@@ -117,7 +120,7 @@ class AcceptInviteApiView(CustomAPIView):
                     }, status=status.HTTP_200_OK)
             else:
                 raise BaseException("You are not allowed to use this invitation code!")
-        
+                  
         except BaseException as e:
             return Response(
                     {

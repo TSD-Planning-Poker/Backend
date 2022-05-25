@@ -23,13 +23,14 @@ class StringLookupField(StringRelatedField):
 class InvitationsSerializer(ModelSerializer):
     class Meta:
         model = Invitation
-        exclude = ["updated_at", "created_at", "from_user", "code", "accepted"]
+        fields = "__all__"
+
 
 # ROOM:
 class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
-        exclude = ["updated_at", "created_at", "members"]
+        exclude = ["updated_at", "created_at"]
 
 class FinaliseStorySerializer(serializers.Serializer):
     final_mark = serializers.FloatField()

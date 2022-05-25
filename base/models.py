@@ -4,8 +4,9 @@ from django.contrib.auth.models import AbstractUser, User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 # class User(AbstractUser):
-#     username = models.CharField(max_length=200, unique=True)
-#     email = models.EmailField(unique=True, null=True, blank=True)
+    # username = models.CharField(max_length=200, unique=True)
+    # email = models.EmailField(unique=True, null=True, blank=True)
+
 
 
 class BaseModelManager(models.Manager):
