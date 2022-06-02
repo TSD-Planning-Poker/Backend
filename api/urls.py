@@ -28,7 +28,7 @@ urlpatterns = [
 
     path('export/<str:delimeter>/', views.ExportCSV_withDelimeter.as_view(), name="export_with_delimeter"),
     path('export/<str:delimeter>/<int:pk>/', views.ExportCSV_withDelimeterForRoom.as_view(), name="export_with_delimeter_for_room"),
-    path('import/<str:delimeter>/<int:pk>/', views.ImportCSV_withDelimeter.as_view(), name="impoer_with_delimeter_for_room"),
+    path('import/<str:delimeter>/<int:pk>/', views.ImportCSV_withDelimeter.as_view(), name="import_with_delimeter_for_room"),
 
     path('change_password/<int:pk>/', views.ChangePassword.as_view(), name="change_password"),
 
