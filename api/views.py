@@ -25,6 +25,7 @@ from django.core.files.storage import FileSystemStorage
 import csv
 import datetime
 import codecs
+import os
 
 class RoomsUpdateAndDetailsView(APIView):
     """ List all room """
@@ -562,7 +563,10 @@ def updateMark(request, pk):
                         "success": False,
                         "message": f"{e}",
                         "error": "Please contact the admin." 
-                    }, status=status.HTTP_400_BAD_REQUEST)       
+                    }, status=status.HTTP_400_BAD_REQUEST)   
+
+
+
 class ExportCSV_withDelimeter(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -571,27 +575,89 @@ class ExportCSV_withDelimeter(APIView):
         """
         Export csv file for Jira with given delimeter
         Method: GET
-        Accepts: mark_id
+        Accepts: delimeter
         """
-        stories = UserStory.objects.all().only('created_at','description','created_by')
-        delimtr = delimeter
+        try:
+            stories = UserStory.objects.all().only('created_at','description','created_by')
+            delimtr = delimeter
 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="export.csv"'
+            # response = HttpResponse(content_type='text/csv')
+            # response['Content-Disposition'] = 'attachment; filename="export.csv"'
+            # writer = csv.writer(response)
+            if not os.path.exists("tmp"):
+                os.makedirs("tmp")
 
-        writer = csv.writer(response)
+            writer = open("tmp/tmpExport.csv", 'w', newline='')
+            writer = csv.writer(writer)
 
-        header = ('Issue Type','Summary','Reporter','Created')
-        header = delimtr.join(header)
-        writer.writerow([header])
+            header = ('Issue Type','Summary','Reporter','Created')
+            header = delimtr.join(header)
+            writer.writerow([header])
 
-        for story in stories:
-            user = User.objects.get(id=story.created_by_id)
-            row = ('Story', story.description, user.username, story.created_at.strftime("%d/%b/%y"))
-            row = delimtr.join(row)
-            writer.writerow([row])
-        
-        return response 
+            for story in stories:
+                user = User.objects.get(id=story.created_by_id)
+                row = ('Story', story.description, user.username, story.created_at.strftime("%d/%b/%y"))
+                row = delimtr.join(row)
+                writer.writerow([row])
+            
+            return Response(data={
+                            "success": True,
+                            "exportPath": f"tmp/tmpExport.csv",
+                        }, status=status.HTTP_200_OK)
+
+        except BaseException as e:
+            return Response(data={
+                "success": False,
+                "message": "Failed to export file",
+                "error": f'{e}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ExportCSV_withDelimeterForRoom(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, delimeter, pk):
+        """
+        Export csv file for Jira with given delimeter for specific room
+        Method: GET
+        Accepts: delimeter_roomId
+        """
+        try:
+            room = Room.objects.get(pk=pk)
+            stories = UserStory.objects.filter(room=room).only('created_at','description','created_by')
+            delimtr = delimeter
+
+            # response = HttpResponse(content_type='text/csv')
+            # response['Content-Disposition'] = 'attachment; filename="export.csv"'
+            # writer = csv.writer(response)
+            if not os.path.exists("tmp"):
+                os.makedirs("tmp")
+
+            writer = open("tmp/tmpExport.csv", 'w', newline='')
+            writer = csv.writer(writer)
+
+            header = ('Issue Type','Summary','Reporter','Created')
+            header = delimtr.join(header)
+            writer.writerow([header])
+
+            for story in stories:
+                user = User.objects.get(id=story.created_by_id)
+                row = ('Story', story.description, user.username, story.created_at.strftime("%d/%b/%y"))
+                row = delimtr.join(row)
+                writer.writerow([row])
+            
+            return Response(data={
+                            "success": True,
+                            "exportPath": f"tmp/tmpExport.csv",
+                        }, status=status.HTTP_200_OK)
+
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": f'Failed to export file for {pk} room id',
+                    "error": f'{e}'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 FILE_STORAGE = FileSystemStorage(location='tmp/')
 class ImportCSV_withDelimeter(APIView):
@@ -599,11 +665,11 @@ class ImportCSV_withDelimeter(APIView):
     permission_classes = [IsAuthenticated]
 
     # @action(detail=False, methods='POST')
-    def post(self, request, delimeter):
+    def post(self, request, delimeter, pk):
         """
-        Import csv file from Jira with given delimeter
+        Import csv file from Jira with given delimeter for specific room
         Method: POST
-        Accepts: delimeter
+        Accepts: delimeter_roomId
         """
         try:
             file = request.FILES["file"]
@@ -611,7 +677,7 @@ class ImportCSV_withDelimeter(APIView):
 
             content = file.read()
             file_content = ContentFile(content)
-            file_name = FILE_STORAGE.save("_tmp.scv", file_content)
+            file_name = FILE_STORAGE.save("_tmp.csv", file_content)
             tmp_file = FILE_STORAGE.path(file_name)
 
             csv_file = open(tmp_file, errors="ignore")
@@ -641,7 +707,8 @@ class ImportCSV_withDelimeter(APIView):
                         created_at = row[get_fields[3]] 
                         stories_list.append(
                             UserStory(
-                                room = Room.objects.get(host=request.user),
+                                # room = Room.objects.get(host=request.user),
+                                room = Room.objects.get(pk=pk),
                                 title = f"Story {id}: {description[:10]}",
                                 description = description,
                                 created_by = request.user,
