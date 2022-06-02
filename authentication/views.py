@@ -10,12 +10,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from authentication.serializers import UserProfileSerializer
+from authentication.serializers import CreateUserSerializer, UserProfileSerializer
 from django.forms.models import model_to_dict
 from django.contrib.auth.models import User
 
 from rest_framework_swagger.renderers import OpenAPIRenderer, SwaggerUIRenderer
 from rest_framework.decorators import api_view, renderer_classes
+from rest_framework import status
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
@@ -83,6 +84,53 @@ class ProfileApiView(APIView):
             return Response(data=self.profile_user, status=200)
         else:
             return Response(data={"error": "Wrong Input, Please try again"}, status=400)
+
+
+
+class CreateUserApiView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+    serializer_class = CreateUserSerializer
+
+    def clean_userdata(self):
+        del self.profile_user['id']
+        del self.profile_user['password']
+        del self.profile_user['is_superuser']
+        del self.profile_user['is_active']
+        del self.profile_user['is_staff']
+        del self.profile_user['groups']
+        del self.profile_user['user_permissions']
+
+
+    def post(self, request):
+        try:
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                self.profile_user = User(
+                    email = serializer.data['email'],
+                    username = serializer.data['username'],
+                    first_name = serializer.data['first_name'],
+                    last_name = serializer.data['last_name'],
+                )
+
+                self.profile_user.set_password(serializer.data['password'])
+                self.profile_user.save()
+                
+                # Change user model to dict object (desrialize)
+                self.profile_user = model_to_dict(self.profile_user)
+
+                # Clean user sensitive data
+                self.clean_userdata()
+
+                return Response(data=self.profile_user, status=200)
+        
+        except BaseException as e:
+            return Response(
+                        {
+                            "success": False, 
+                            "error": f"Error: {e}"
+                        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 

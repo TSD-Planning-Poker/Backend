@@ -19,11 +19,12 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.authtoken import views
 import authentication.views as auth_views
-from .views import logout_view, ProfileApiView
+from .views import logout_view, ProfileApiView, CreateUserApiView
 
 urlpatterns = [
     path('login/', views.obtain_auth_token, name="log_in"),
     path('logout/', auth_views.logout_view, name="log_out"),
     path('allusers/', auth_views.allusers_view, name="all_users"),
-    path('profile/', ProfileApiView.as_view(), name="profile")
+    path('profile/', ProfileApiView.as_view(), name="profile"),
+    path('register/', CreateUserApiView.as_view(), name="register_user")
 ]
