@@ -584,10 +584,10 @@ class ExportCSV_withDelimeter(APIView):
             # response = HttpResponse(content_type='text/csv')
             # response['Content-Disposition'] = 'attachment; filename="export.csv"'
             # writer = csv.writer(response)
-            if not os.path.exists("tmp"):
-                os.makedirs("tmp")
+            if not os.path.exists("staticfiles/tmp"):
+                os.makedirs("staticfiles/tmp")
 
-            writer = open("tmp/tmpExport.csv", 'w', newline='')
+            writer = open("staticfiles/tmp/tmpExport.csv", 'w', newline='')
             writer = csv.writer(writer)
 
             header = ('Issue Type','Summary','Reporter','Created')
@@ -630,10 +630,10 @@ class ExportCSV_withDelimeterForRoom(APIView):
             # response = HttpResponse(content_type='text/csv')
             # response['Content-Disposition'] = 'attachment; filename="export.csv"'
             # writer = csv.writer(response)
-            if not os.path.exists("tmp"):
-                os.makedirs("tmp")
+            if not os.path.exists("staticfiles/tmp"):
+                os.makedirs("staticfiles/tmp")
 
-            writer = open("tmp/tmpExport.csv", 'w', newline='')
+            writer = open("staticfiles/tmp/tmpExport.csv", 'w', newline='')
             writer = csv.writer(writer)
 
             header = ('Issue Type','Summary','Reporter','Created')
