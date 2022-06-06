@@ -5,7 +5,7 @@ from unicodedata import name
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from api.room_views import CustomAPIView
-from base.models import Room, Task, Mark, UserStory
+from base.models import Room, Task, Mark, UserStory, VotingHistory
 from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, UserStoriesExportSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from .serializers import FinaliseStorySerializer, MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
 from api import serializers
@@ -106,6 +106,13 @@ class StartUserStorySessionApiView(APIView):
                             mark = 0,
                             evaluator = member
                         )
+                    VotingHistory.objects.create(
+                        mark = 0,
+                        user_story = story,
+                        evaluator = member,
+                        date_evaluated = datetime.datetime.now(),
+                        note = "Inital Mark when starting session"
+                    )
                 else:
                     if member_mark.first().mark > 0:
                         count += 1
@@ -190,6 +197,27 @@ class UserStoriesUpdateAndDetailsApiView(APIView):
             return Response(room)
         else:
             return Response("User story not found", status=400)
+
+    def delete(self, request, story_id):
+        try:
+            story = UserStory.objects.filter(id=story_id)
+            if story.count() == 0:
+                raise BaseException("User Story not found")
+            story = story.first()
+            tasks = story.task_set.all()
+            for task in tasks:
+                task.delete()
+            story.delete()
+            return Response({
+                "success": True, 
+                "message": "User Story Deleted successfully including all Tasks!"
+            }, status=200)
+        except BaseException as e:
+            return Response({
+                "success": False,
+                "message": f"ERROR: {e}"
+            }, status=400)
+    
 
     def put(self, request, story_id):
         """
@@ -548,6 +576,13 @@ def updateMark(request, pk):
         if request.user == mark.evaluator:
             mark.mark = serializer.data['mark']
             mark.save()
+            VotingHistory.objects.create(
+                        mark = 0,
+                        user_story = mark.user_story,
+                        evaluator = mark.evaluator,
+                        date_evaluated = datetime.datetime.now(),
+                        note = "Updated Mark"
+                    )
         else:
             raise BaseException('You are not authorised to update this mark')
 

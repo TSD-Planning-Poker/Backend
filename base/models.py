@@ -73,7 +73,7 @@ class Task(BaseModel):
     created_by = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
     
     def __str__(self):
-        return self.body[:50]
+        return self.title[:50]
 class Mark(BaseModel):
     mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
     user_story = models.ForeignKey(UserStory, on_delete=models.CASCADE)
@@ -82,3 +82,14 @@ class Mark(BaseModel):
 
     def __str__(self):
         return str(self.mark)
+
+
+class VotingHistory(BaseModel):
+    mark = models.FloatField(validators=[MinValueValidator(0.0), MaxValueValidator(10.0)])
+    user_story = models.ForeignKey(UserStory, on_delete=models.CASCADE)
+    evaluator = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, null=False)
+    date_evaluated = models.DateTimeField(auto_now=True)
+    note = models.CharField(max_length=500)
+
+    def __str__(self):
+        return str(self.note)
