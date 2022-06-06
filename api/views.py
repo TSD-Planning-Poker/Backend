@@ -474,7 +474,10 @@ class MarkListAPIView(CustomAPIView):
     serializer_class = MarkSerializer
 
     def get(self, request: request.Request):
-        marks = Mark.objects.filter(evaluator=request.user).values("mark", "user_story", "user_story__room__name","user_story__room__id", "user_story__title","evaluator", "evaluator__username")
+        if request.user.is_superuser:
+            marks = Mark.objects.all().values("id", "mark", "user_story", "user_story__room__name","user_story__room__id", "user_story__title","evaluator", "evaluator__username")
+        else:
+            marks = Mark.objects.filter(evaluator=request.user).values("id", "mark", "user_story", "user_story__room__name","user_story__room__id", "user_story__title","evaluator", "evaluator__username")
         return Response(data={
                         "success": True,
                         "message": "Successfully fetched marks",
@@ -577,7 +580,7 @@ def updateMark(request, pk):
             mark.mark = serializer.data['mark']
             mark.save()
             VotingHistory.objects.create(
-                        mark = 0,
+                        mark = serializer.data['mark'],
                         user_story = mark.user_story,
                         evaluator = mark.evaluator,
                         date_evaluated = datetime.datetime.now(),
@@ -787,3 +790,29 @@ class ChangePassword(APIView):
                             "message": "Only admin user can change password",
                         }, status=status.HTTP_401_UNAUTHORIZED)
 
+class VotingHistory(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, story_id):
+
+        try:
+
+            story = UserStory.objects.filter(id=story_id)
+            if story.count() == 0:
+                raise BaseException("User Story could not be found")
+
+            story = story.first()
+
+            voting_histories = story.votinghistory_set.all().values()
+            
+            return Response(data={
+                "success": True,
+                "data": voting_histories
+            },)
+
+        except BaseException as e:
+            return Response(data={
+                    "success": False,
+                    "message": f"ERROR: {e}",
+                }, status=status.HTTP_400_BAD_REQUEST)
