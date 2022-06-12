@@ -30,7 +30,7 @@ class InvitationsSerializer(ModelSerializer):
 class RoomSerializer(ModelSerializer):
     class Meta:
         model = Room
-        exclude = ["updated_at", "created_at"]
+        exclude = ["updated_at", "created_at", "members"]
 
 class FinaliseStorySerializer(serializers.Serializer):
     final_mark = serializers.FloatField()
