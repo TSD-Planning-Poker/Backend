@@ -1,20 +1,14 @@
-from asyncore import write
-import json
-from tkinter import Y
-from unicodedata import name
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from api.room_views import CustomAPIView
 from base.models import Room, Task, Mark, UserStory, VotingHistory
-from .serializers import MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, UserStoriesExportSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
-from .serializers import FinaliseStorySerializer, MarkUpdateSerializer, RoomListSerializer, UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, MarkDetailSerializer, UserStoriesSerializer
-from api import serializers
-from rest_framework import generics, status, viewsets, request
+from .serializers import FinaliseStorySerializer, MarkUpdateSerializer, RoomListSerializer, \
+    UserStoriesDetailsSerializer, RoomSerializer, MarkSerializer, TaskSerializer, RoomDetailSerializer, \
+    MarkDetailSerializer, UserStoriesSerializer
+from rest_framework import status, request
 from rest_framework.views import APIView
-from rest_framework.generics import get_object_or_404, ListCreateAPIView
-from django.db import transaction
-from django.contrib.auth.models import AbstractUser, User
-from django.http import JsonResponse, HttpResponse
+from rest_framework.generics import get_object_or_404
+from django.contrib.auth.models import User
+from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -24,7 +18,6 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import FileSystemStorage
 import csv
 import datetime
-import codecs
 import os
 
 class RoomsUpdateAndDetailsView(APIView):
