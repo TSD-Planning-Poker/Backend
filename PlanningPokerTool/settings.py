@@ -15,6 +15,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 DB_DIR = BASE_DIR / 'db'
 
+CSRF_TRUSTED_ORIGINS = ['https://*.ptl.cloud']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
