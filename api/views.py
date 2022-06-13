@@ -268,23 +268,34 @@ class RoomListCreateAPIView(APIView):
         return JsonResponse(data=data, safe=False)
 
     def post(self, request):
-        """
-        We create a new room object, and then we return a dictionary representation of that room object
+            """
+            We create a new room object, and then we return a dictionary representation of that room object
 
-        :param request: The request object
-        :return: A JsonResponse object.
-        """
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        room = Room.objects.create(
-            name=serializer.data['name'],
-            description=serializer.data['description'],
-            host=request.user,
-        )
-        # room.save()
-        room_dict = model_to_dict(room)
+            :param request: The request object
+            :return: A JsonResponse object.
+            """
+            serializer = self.serializer_class(data=request.data)
+            serializer.is_valid(raise_exception=True)
 
-        return JsonResponse(data=room_dict, safe=False)
+            try: 
+                room = Room.objects.create(
+                    name=serializer.data['name'],
+                    description=serializer.data['description'],
+                    host=request.user
+                )
+                room.save()
+
+            except BaseException as e:
+                return Response(data={
+                        "success": False,
+                        "message": f"ERROR: {e}",
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+            room_dict = model_to_dict(room)
+            room.members.add(request.user.id)
+
+            return JsonResponse(data=room_dict, safe=False)
 
 
 
