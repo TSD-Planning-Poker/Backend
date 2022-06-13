@@ -1,13 +1,7 @@
-from dataclasses import field
-from email.policy import default
-from rest_framework.serializers import ModelSerializer, StringRelatedField, SerializerMethodField, JSONField, Serializer
-from base.models import Invitation, Room, Deck, Task, User, Mark, UserStory
+from rest_framework.serializers import ModelSerializer, StringRelatedField, Serializer
+from base.models import Invitation, Room, Task, User, Mark, UserStory
 from django.db import models
-from django.http import JsonResponse
 from rest_framework import serializers
-from django.http import HttpResponse
-from rest_framework.response import Response
-# from rest_framework.decorators import action
 
 
 class StringLookupField(StringRelatedField):
