@@ -11,9 +11,10 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
+from base.utils import joing_string
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_DIR = BASE_DIR / 'db'
+DB_DIR = BASE_DIR
 
 CSRF_TRUSTED_ORIGINS = ['https://*.ptl.cloud']
 
@@ -96,7 +97,7 @@ REST_FRAMEWORK = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_DIR / 'db.sqlite3',
+        'NAME': joing_string(DB_DIR , 'db.sqlite3')
     }
 }
 

@@ -17,8 +17,7 @@ class StringLookupField(StringRelatedField):
 class InvitationsSerializer(ModelSerializer):
     class Meta:
         model = Invitation
-        fields = "__all__"
-
+        exclude = ['code', 'from_user']
 
 # ROOM:
 class RoomSerializer(ModelSerializer):

@@ -31,6 +31,6 @@ urlpatterns = [
     path('import/<str:delimeter>/<int:pk>/', views.ImportCSV_withDelimeter.as_view(), name="import_with_delimeter_for_room"),
 
     path('change_password/<int:pk>/', views.ChangePassword.as_view(), name="change_password"),
-    path('voting_history/<int:story_id>/', views.VotingHistory.as_view(), name="change_password"),
+    path('voting_history/<int:story_id>/', views.VotingHistorys.as_view(), name="change_password"),
 
 ]

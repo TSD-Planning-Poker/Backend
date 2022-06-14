@@ -99,6 +99,7 @@ class StartUserStorySessionApiView(APIView):
                             mark = 0,
                             evaluator = member
                         )
+                    
                     VotingHistory.objects.create(
                         mark = 0,
                         user_story = story,
@@ -794,7 +795,7 @@ class ChangePassword(APIView):
                             "message": "Only admin user can change password",
                         }, status=status.HTTP_401_UNAUTHORIZED)
 
-class VotingHistory(APIView):
+class VotingHistorys(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
